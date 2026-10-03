@@ -126,7 +126,7 @@ theorem sliceUniv_of_isPullback (hpb : IsPullback p₁' u' u e) (dc : Data u c) 
       have L := FBF_on_mor_map dZ (pasteCP hpb K) dc.Pbk m₀ (FBF_on_mor dc (pasteCP hpb K) hs)
         (FBF_on_mor_fst _ _ _) (FBF_on_mor_snd _ _ _) eq1 hPq rfl
       have R := FBF_on_mor_map dZ (pasteCP hpb K) (chosenOfIsPullback hpb) f K.p₁
-        (by simp [pasteCP, chosenOfIsPullback]) (by simp [pasteCP, chosenOfIsPullback]) eq2 hτ rfl
+        (by simp [pasteCP, chosenOfIsPullback]) (by simp [pasteCP, chosenOfIsPullback, K.condition]) eq2 hτ rfl
       rw [L, R]
       simp only [Category.assoc]
       rw [hPqε, ← hτε, ← Category.assoc, ← hc]
@@ -233,9 +233,9 @@ noncomputable def universal_of_sliceUniv {c : Over Z} (D : Data U c)
   comm {d f K} g := (Classical.choose_spec (over_exists U D h K g)).2
   uniq {d f g' k} K eq_fp eq_gp H := by
     refine Over.OverMorphism.ext ?_
-    refine h.uniq (forgetCP U K) (congrArg Over.Hom.left eq_fp)
-      (congrArg Over.Hom.left eq_gp) ?_
-    have := congrArg Over.Hom.left H
+    refine h.uniq (forgetCP U K) (congrArg CommaMorphism.left eq_fp)
+      (congrArg CommaMorphism.left eq_gp) ?_
+    have := congrArg CommaMorphism.left H
     change (FBF_on_mor D K eq_fp ≫ D.epsilon).left = (FBF_on_mor D K eq_gp ≫ D.epsilon).left
       at this
     rw [Over.comp_left, Over.comp_left, forget_FBF U D K eq_fp, forget_FBF U D K eq_gp] at this
@@ -278,7 +278,8 @@ theorem Setup.eps_over (S : Setup hpb dc dZ q w D) [Universal dZ] :
     (by simp [liftPbk, liftPbk', pasteCP, chosenOfIsPullback])
     (by simp [liftPbk, liftPbk', pasteCP, chosenOfIsPullback]) eq1 S.hPq rfl
   have R := FBF_on_mor_map dZ (pasteCP hpb D.Pbk) (chosenOfIsPullback hpb) D.pi D.Pbk.p₁
-    (by simp [pasteCP, chosenOfIsPullback]) (by simp [pasteCP, chosenOfIsPullback]) eq2 S.hτ rfl
+    (by simp [pasteCP, chosenOfIsPullback])
+    (by simp [pasteCP, chosenOfIsPullback, D.Pbk.condition]) eq2 S.hτ rfl
   have hm : FBF_on_mor dZ (pasteCP hpb D.Pbk) eq1 = FBF_on_mor dZ (pasteCP hpb D.Pbk) eq2 :=
     FBF_on_mor_congr dZ _ S.hW.w eq1 eq2
   rw [S.hε, Category.assoc, ← S.hPqε, ← reassoc_of% L, hm, R, Category.assoc, ← S.hτε]
@@ -322,6 +323,8 @@ noncomputable abbrev sdc : Data u c.left := IsExpArr.isExpArrowData c.left
 
 /-- The chosen `Data` for `P X`. -/
 noncomputable abbrev sdZ : Data u (sZ u) := IsExpArr.isExpArrowData (sZ u)
+
+noncomputable instance : Universal (sdZ u) := IsExpArr.isExpArrow _
 
 noncomputable def sPq : (sdc u c).P ⟶ (sdZ u).P := canonical_mor' c.hom (sdZ u) (sdc u c)
 

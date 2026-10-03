@@ -16,27 +16,57 @@ pullback square, there is a unique natural transformation `F ⟶ G` restricting 
 -/
 
 open CategoryTheory Limits
+namespace CategoryTheory.Comma
+universe wJ' vA vB vT uA uB uT wJ
+variable {J : Type wJ} [Category.{wJ'} J] {A : Type uA} [Category.{vA} A] {B : Type uB} [Category.{vB} B]
+  {T : Type uT} [Category.{vT} T] {L : A ⥤ T} {R : B ⥤ T} {F : J ⥤ Comma L R}
+
+/-- The projections of a comma category jointly reflect limits, provided `R` preserves the
+limit of the second projection of the diagram. -/
+noncomputable def fstSndJointlyReflectLimit {c : Cone F} [PreservesLimit (F ⋙ snd L R) R]
+    (h₁ : IsLimit ((fst L R).mapCone c)) (h₂ : IsLimit ((snd L R).mapCone c)) : IsLimit c where
+  lift s :=
+    { left := h₁.lift ((fst L R).mapCone s)
+      right := h₂.lift ((snd L R).mapCone s)
+      w := (isLimitOfPreserves R h₂).hom_ext fun j => by
+        have hc := (c.π.app j).w
+        have hs := (s.π.app j).w
+        have e₁ := h₁.fac ((fst L R).mapCone s) j
+        have e₂ := h₂.fac ((snd L R).mapCone s) j
+        simp only [Functor.mapCone_π_app, fst_map, snd_map, Functor.const_obj_obj,
+          Functor.comp_obj, fst_obj, snd_obj] at e₁ e₂ hc hs
+        simp only [Functor.mapCone_π_app, Functor.comp_obj, snd_obj, snd_map, Category.assoc]
+        rw [← R.map_comp, e₂, ← hc, ← Category.assoc, ← L.map_comp, e₁, hs] }
+  fac s j := by
+    ext
+    · exact h₁.fac ((fst L R).mapCone s) j
+    · exact h₂.fac ((snd L R).mapCone s) j
+  uniq s m hm := by
+    ext
+    · exact h₁.uniq ((fst L R).mapCone s) m.left fun j => congrArg CommaMorphism.left (hm j)
+    · exact h₂.uniq ((snd L R).mapCone s) m.right fun j => congrArg CommaMorphism.right (hm j)
+
+end CategoryTheory.Comma
+
 
 /-- A `ChosenPullback` is determined by its pullback object and projections. -/
 lemma ChosenPullback.eq_default {C : Type*} [Category C] {X₁ X₂ S : C} {f₁ : X₁ ⟶ S}
     {f₂ : X₂ ⟶ S} (h : ChosenPullback f₁ f₂) :
     h = { pullback := h.pullback, p₁ := h.p₁, p₂ := h.p₂, condition := h.condition,
           isLimit := h.isLimit } := by
-  obtain ⟨pb, p₁, p₂, c, il, p, hp⟩ := h
-  subst hp
+  cases h
   rfl
 
 /-- Two `ChosenPullback`s with the same object and projections are equal. -/
 lemma ChosenPullback.ext_of_eq {C : Type*} [Category C] {X₁ X₂ S : C} {f₁ : X₁ ⟶ S}
     {f₂ : X₂ ⟶ S} {h h' : ChosenPullback f₁ f₂} (hpb : h.pullback = h'.pullback)
     (h1 : HEq h.p₁ h'.p₁) (h2 : HEq h.p₂ h'.p₂) : h = h' := by
-  obtain ⟨pb, p1, p2, c, il, p, hp⟩ := h
-  obtain ⟨pb', p1', p2', c', il', p', hp'⟩ := h'
+  obtain ⟨pb, p1, p2, c, il⟩ := h
+  obtain ⟨pb', p1', p2', c', il'⟩ := h'
   dsimp only at hpb h1 h2
   subst hpb
   cases h1
   cases h2
-  subst hp hp'
   congr
   exact Subsingleton.elim _ _
 

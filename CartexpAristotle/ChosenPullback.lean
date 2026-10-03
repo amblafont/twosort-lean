@@ -26,6 +26,7 @@ structure ChosenPullback {X₁ X₂ S : C} (f₁ : X₁ ⟶ S) (f₂ : X₂ ⟶ 
   isLimit : IsLimit (PullbackCone.mk p₁ p₂ condition)
 namespace ChosenPullback
 variable {X₁ X₂ S : C} {f₁ : X₁ ⟶ S} {f₂ : X₂ ⟶ S}
+attribute [reassoc] condition
 lemma isPullback (h : ChosenPullback f₁ f₂) : IsPullback h.p₁ h.p₂ f₁ f₂ :=
   IsPullback.of_isLimit h.isLimit
 @[ext]

@@ -309,7 +309,6 @@ noncomputable def lift_arrow_iso_univ_helper {c : C} (d : Data u c) [Universal d
     refine (Universal.comm (data := d) (Kuf := pullBackTransform f Kuf')
       (f := f' ≫ f.inv.right) (g := g')).trans ?_
     rw [← fbt_transport f d sq upbk hw Kuf' eqk hs']
-    rfl
   uniq := by
     intro d' f'' g'' h'' Kufp eq_fp eq_gp eq_eps
     have pifix : pi' ≫ f.inv.right = d.pi := by
@@ -353,12 +352,10 @@ noncomputable def lift_arrow_iso_univ {c : C} (d : Data u c) [Universal d] :
 @[reducible]
 noncomputable def lift_arrow_iso_univ' {c : C} (d : Data u c)
     [Universal (lift_arrow_iso f d)] : Universal d := by
-  -- The projection `p` of a `ChosenPullback` is data; `subst` makes it the default `p₁ ≫ u`.
-  obtain ⟨P, pi, ⟨pb, p1, p2, cond, il, p, hp⟩, eps⟩ := d
-  subst hp
+  obtain ⟨P, pi, ⟨pb, p1, p2, cond, il⟩, eps⟩ := d
   exact lift_arrow_iso_univ_helper f.symm
     (lift_arrow_iso f ⟨P, pi, { pullback := pb, p₁ := p1, p₂ := p2, condition := cond,
-                                isLimit := il, hp₁ := rfl }, eps⟩) (pi' := pi)
+                                isLimit := il }, eps⟩) (pi' := pi)
     (by
       change pi = (pi ≫ f.hom.right) ≫ f.inv.right
       rw [Category.assoc, right_hom_inv, Category.comp_id])
@@ -459,11 +456,11 @@ noncomputable def functor_preserves_1_is_enough (u : Y ⟶ X) (F : C ⥤ D)
       · change F.map _ ≫ F.map _ = _
         rw [← F.map_comp]
         simp only [pullbackMor1, FBF_on_mor, IsPullback.lift_fst]
-        exact (IsPullback.lift_fst _ _ _ _).symm
+        rfl
       · change F.map _ ≫ F.map _ = _
         rw [← F.map_comp]
         simp only [pullbackMor1, FBF_on_mor, IsPullback.lift_snd, F.map_comp]
-        exact (IsPullback.lift_snd _ _ _ _).symm
+        rfl
     have : IsIso (canonical_mor (functor_on F (dc c)) (functor_on F d)) := by
       rw [← key]; exact Functor.map_isIso F _
     exact canonical_mor_iso_lift (functor_on F (dc c)) (functor_on F d)

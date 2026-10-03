@@ -173,7 +173,7 @@ def eps : (idx C).Elements ⥤ C where
   obj x := x.1.obj x.2
   map {x y} f := f.1.φ x.2 ≫ eqToHom (congrArg y.1.obj (f.2 : f.1.f x.2 = y.2))
   map_id x := by
-    simp; rfl
+    simp
   map_comp {x y z} f g := by
     obtain ⟨X, i⟩ := x
     obtain ⟨Y, j⟩ := y
@@ -184,7 +184,7 @@ def eps : (idx C).Elements ⥤ C where
     change Y ⟶ Z at g
     obtain rfl : j = f.f i := hf.symm
     obtain rfl : k = g.f (f.f i) := hg.symm
-    simp; rfl
+    simp
 
 lemma fc_hom_ext' {X Y : FormalCoproduct.{w} C} {f g : X ⟶ Y} (h₁ : f.f = g.f)
     (h₂ : ∀ i, HEq (f.φ i) (g.φ i)) : f = g := by
