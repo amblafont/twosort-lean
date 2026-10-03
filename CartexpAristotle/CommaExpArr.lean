@@ -344,7 +344,7 @@ section Universal'
 variable [HasPullbacks C] [HasPullbacks C']
 
 /-- The universality of the exponential data of `(u, u')` at `(c, c', f)`. -/
-@[instance_reducible]
+@[reducible]
 noncomputable def commaUniversal : Universal (commaData F u u' hsq f) where
   mor := fun {d a K} g => ⟨morL F u u' hsq f K g, morR F u u' hsq f K g, mor_w F u u' hsq f K g⟩
   isSlice := fun {d a K} g =>
@@ -371,7 +371,7 @@ noncomputable def commaUniversal : Universal (commaData F u u' hsq f) where
       (Universal.uniq (data := dataR u' c') (chosenR F u u' hsq K) _ _ hr)
 
 /-- The morphism `(u, u')` is exponentiable in the comma category. -/
-@[instance_reducible]
+@[reducible]
 noncomputable def commaIsExpArr : IsExpArr (commaArr F u u' hsq) where
   isExpArrowData := fun c => commaData F u u' hsq c.hom
   isExpArrow := fun c => commaUniversal F u u' hsq c.hom

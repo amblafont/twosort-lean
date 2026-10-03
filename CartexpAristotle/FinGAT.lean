@@ -115,7 +115,7 @@ lemma canonical_comma_right {c : Comma F (𝟭 C')} (D : Data (commaArr F u u' h
     (ChosenPullback.eq_default _).symm) _ _ HEq.rfl
 
 /-- A `Data` in the comma category whose two components are universal is universal. -/
-@[instance_reducible]
+@[reducible]
 noncomputable def universal_of_components {c : Comma F (𝟭 C')} (D : Data (commaArr F u u' hsq) c)
     (hL : Universal (functor_on (Comma.fst F (𝟭 C')) D))
     (hR : Universal (functor_on (Comma.snd F (𝟭 C')) D)) : Universal D := by
@@ -149,7 +149,7 @@ lemma functor_on_snd_commaData :
   exact ChosenPullback.ext_of_eq rfl HEq.rfl HEq.rfl
 
 /-- The first projection of the comma category preserves exponentiable arrows. -/
-@[instance_reducible]
+@[reducible]
 noncomputable def fstPreserves :
     FunctorPreserves (commaArr F u u' hsq) (Comma.fst F (𝟭 C')) :=
   functor_preserves_1_is_enough _ _ (fun c => commaData F u u' hsq c.hom)
@@ -158,7 +158,7 @@ noncomputable def fstPreserves :
       exact IsExpArr.isExpArrow (u := u) c.left)
 
 /-- The second projection of the comma category preserves exponentiable arrows. -/
-@[instance_reducible]
+@[reducible]
 noncomputable def sndPreserves :
     FunctorPreserves (commaArr F u u' hsq) (Comma.snd F (𝟭 C')) :=
   functor_preserves_1_is_enough _ _ (fun c => commaData F u u' hsq c.hom)
@@ -206,7 +206,7 @@ variable [PreservesLimitsOfShape WalkingCospan F] [PreservesLimitsOfShape Walkin
 
 /-- If `α : F ⟶ G` is a natural transformation whose component at an exponentiable arrow `u` is
 a pullback square, then `toComma α` preserves the exponentiable arrow `u`. -/
-@[instance_reducible]
+@[reducible]
 noncomputable def toCommaPreserves : FunctorPreserves u (toComma α) where
   functor_preserves {c} d univ := by
     refine universal_of_components F u (G.map u) hsq (functor_on (toComma α) d) ?_ ?_
@@ -260,7 +260,7 @@ lemma nonempty_iso (hA : IsBiInitial A) (F G : A ⟶ B) : Nonempty (F ≅ G) :=
 end IsBiInitial
 
 /-- Exponentiability transfers along an isomorphism of arrows. -/
-@[instance_reducible]
+@[reducible]
 noncomputable def _root_.IsExpArr.ofIso {D : Type*} [Category D] {Y X Y' X' : D} (u : Y ⟶ X)
     (v : Y' ⟶ X') [IsExpArr u] (i : Arrow.mk u ≅ Arrow.mk v) : IsExpArr v where
   isExpArrowData c := lift_arrow_iso i (IsExpArr.isExpArrowData (u := u) c)

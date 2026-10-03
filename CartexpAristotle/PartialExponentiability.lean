@@ -3,8 +3,8 @@ Copyright (c) 2026 Lean Contributor. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Lean Contributor
 -/
-import Mathlib.CategoryTheory.Limits.Shapes.Pullback.ChosenPullback
-
+import CartexpAristotle.ChosenPullback
+import Mathlib.CategoryTheory.Limits.Shapes.Pullback.IsPullback.Basic
 /-!
 # Partial exponentiability of an arrow
 
@@ -110,7 +110,7 @@ lemma FBF_on_mor_epsilon' {c c' : C} (f : c ⟶ c') (d1 : Data u c') [Universal 
 
 /-- Conversely, if a canonical morphism has an inverse, then
 the domain data was already universal. -/
-@[instance_reducible]
+@[reducible]
 noncomputable def canonical_mor_iso_lift (d1 : Data u c) [Universal d1] (d2 : Data u c)
     [IsIso (canonical_mor d1 d2)] : Universal d2 where
   mor g := Universal.mor g ≫ inv (canonical_mor d1 d2)
@@ -275,7 +275,7 @@ private lemma fbt_transport {c : C} (d : Data u c) {pi' : d.P ⟶ X'}
       left_inv_hom, Category.comp_id]
   · simp only [IsPullback.lift_snd]
 
-@[instance_reducible]
+@[reducible]
 noncomputable def lift_arrow_iso_univ_helper {c : C} (d : Data u c) [Universal d] {pi' : d.P ⟶ X'}
    (eq_pi' : pi' = d.pi ≫ f.hom.right) {w : (d.Pbk : C) ⟶ Y'}
    (sq : w ≫ u' = d.Pbk.p₂ ≫ pi')
@@ -342,7 +342,7 @@ noncomputable def lift_arrow_iso {c : C} (d : Data u c) : Data u' c where
 
 /-- If two arrows are isomorphic, then the universality of an arrow can be recovered from
 the universality of the other arrow. -/
-@[instance_reducible]
+@[reducible]
 noncomputable def lift_arrow_iso_univ {c : C} (d : Data u c) [Universal d] :
     Universal (lift_arrow_iso f d) :=
   lift_arrow_iso_univ_helper f d (pi' := (lift_arrow_iso f d).pi) rfl
@@ -350,7 +350,7 @@ noncomputable def lift_arrow_iso_univ {c : C} (d : Data u c) [Universal d] :
     (lift_arrow_iso f d).Pbk.isLimit rfl
 
 /-- ...and conversely. -/
-@[instance_reducible]
+@[reducible]
 noncomputable def lift_arrow_iso_univ' {c : C} (d : Data u c)
     [Universal (lift_arrow_iso f d)] : Universal d := by
   -- The projection `p` of a `ChosenPullback` is data; `subst` makes it the default `p₁ ≫ u`.
@@ -435,7 +435,7 @@ noncomputable instance functor_preserves_comp (u : Y ⟶ X) {E : Type*} [Categor
       (FunctorPreserves.functor_preserves (F := F) d univ)
 
 /-- It suffices to check preservation of universality on one universal `Data` for each `c`. -/
-@[instance_reducible]
+@[reducible]
 noncomputable def functor_preserves_1_is_enough (u : Y ⟶ X) (F : C ⥤ D)
     [PreservesLimitsOfShape WalkingCospan F] (dc : ∀ c, Data u c) (uc : ∀ c, Universal (dc c))
     (hF : ∀ c, Universal (functor_on F (dc c))) : FunctorPreserves u F where
@@ -470,7 +470,7 @@ noncomputable def functor_preserves_1_is_enough (u : Y ⟶ X) (F : C ⥤ D)
 
 /-- Universality of `functor_on F (lift_arrow_iso i d)` gives universality of the transport of
 `functor_on F d` along the image of `i`. -/
-@[instance_reducible]
+@[reducible]
 noncomputable def lift_arrow_iso_on_functor {X' Y' : C} {u : Y ⟶ X} {v : Y' ⟶ X'} (F : C ⥤ D)
     [PreservesLimitsOfShape WalkingCospan F] (i : Arrow.mk v ≅ Arrow.mk u) {c : C} (d : Data v c)
     (huniv : Universal (functor_on F (lift_arrow_iso i d))) :
@@ -484,7 +484,7 @@ noncomputable def lift_arrow_iso_on_functor {X' Y' : C} {u : Y ⟶ X} {v : Y' �
     (lift_arrow_iso (F.mapArrow.mapIso i) (functor_on F d)).Pbk.isLimit
     (by simp [lift_arrow_iso, functor_on, functPullback])
 
-@[instance_reducible]
+@[reducible]
 noncomputable def functor_preserves_iso {X' Y' : C} (u : Y ⟶ X) (v : Y' ⟶ X') (F : C ⥤ D)
     [PreservesLimitsOfShape WalkingCospan F] (i : Arrow.mk v ≅ Arrow.mk u)
     [FunctorPreserves u F] : FunctorPreserves v F where

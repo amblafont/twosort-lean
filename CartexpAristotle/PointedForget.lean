@@ -36,7 +36,7 @@ lemma FBF_on_mor_iso (data : Data u c) {d : C} {h : d ⟶ X} {f : d ⟶ data.P}
     rw [← Category.assoc, h₂]
 
 /-- Universality only has to be checked against one chosen pullback for each `f`. -/
-@[instance_reducible]
+@[reducible]
 noncomputable def universal_of_chosen (data : Data u c)
     (K : ∀ {d : C} (f : d ⟶ X), ChosenPullback u f)
     (mor : ∀ {d : C} {f : d ⟶ X}, ((K f).pullback ⟶ c) → (d ⟶ data.P))
@@ -287,7 +287,7 @@ lemma slice_eq {d : Cat.{w, w + 1}} (h : d ⥤ Type w) (G : h.Elements ⥤ c) :
     morF h G ⋙ idx c = h := rfl
 
 /-- `expData c` is universal, making `U` an exponentiable arrow in `Cat`. -/
-@[instance_reducible]
+@[reducible]
 noncomputable def expUniversal : Universal (expData c) :=
   universal_of_chosen (expData c) (fun f => elChosen f)
     (fun {d f} g => (morF f.toFunctor g.toFunctor).toCatHom)

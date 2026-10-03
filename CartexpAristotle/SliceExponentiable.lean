@@ -225,7 +225,7 @@ noncomputable def overData {c : Over Z} (D : Data U.left c.left)
   epsilon := Over.homMk D.epsilon he
 
 /-- Universality in `Over Z` follows from universality in `C` of maps over `Z`. -/
-@[instance_reducible]
+@[reducible]
 noncomputable def universal_of_sliceUniv {c : Over Z} (D : Data U c)
     (h : SliceUniv (forgetData U D) c.hom B.hom) : Universal D where
   mor {d f K} g := Classical.choose (over_exists U D h K g)
@@ -376,7 +376,7 @@ noncomputable def sSetup : Setup (shpb u) (sdc u c) (sdZ u) c.hom (sW u) (sD u c
 noncomputable def sOverData : Data (sArr u) c :=
   overData (sArr u) (sD u c) (sSetup u c).eps_over
 
-@[instance_reducible]
+@[reducible]
 noncomputable def sOverUniv : Universal (sOverData u c) :=
   universal_of_sliceUniv (sArr u) (sOverData u c)
     (sliceUniv_of_isPullback (shpb u) (sdc u c) (sdZ u) c.hom (sW u) (sPq u c) (shPq u c)

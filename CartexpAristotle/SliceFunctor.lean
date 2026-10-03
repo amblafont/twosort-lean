@@ -104,7 +104,7 @@ variable [HasPullbacks C] (F : C ⥤ E) [PreservesLimitsOfShape WalkingCospan F]
 /-- The functor `C/PX ⥤ E/Z'` induced by `F` and an isomorphism `θ`. -/
 noncomputable abbrev sliceMap : Over (sZ u) ⥤ Over Z' := Over.post F ⋙ Over.map θ
 
-@[instance_reducible]
+@[reducible]
 noncomputable def sliceUnivMap (c : Over (sZ u)) :
     Universal (functor_on (sliceMap F u θ) (sOverData u c)) := by
   haveI : Universal (sdc u c) := inferInstance
