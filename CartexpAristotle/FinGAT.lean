@@ -298,13 +298,13 @@ noncomputable def _root_.IsExpArr.ofIso {D : Type*} [Category D] {Y X Y' X' : D}
 
 section Comma
 
-variable {A C : ExpArrCat.{u, u}} (F : A ⥤ C) [PreservesLimitsOfShape WalkingCospan F]
+variable {A C : ExpArrCat.{v, max u v}} (F : A ⥤ C) [PreservesLimitsOfShape WalkingCospan F]
   (G : A ⟶ C) [IsExpArr (G.functor.map A.arr)] {y : F.obj A.dom ⟶ G.functor.obj A.dom}
   {x : F.obj A.cod ⟶ G.functor.obj A.cod}
   (hsq : IsPullback y (F.map A.arr) (G.functor.map A.arr) x)
 
 /-- The comma category `Comma F (𝟭 C)` as an `ExpArrCat`, with the arrow `(p, G p)`. -/
-noncomputable abbrev commaOf : ExpArrCat.{u, u} :=
+noncomputable abbrev commaOf : ExpArrCat.{v, max u v} :=
   comma F A.arr (G.functor.map A.arr) hsq
 
 /-- The first projection from the comma category. -/
@@ -440,7 +440,7 @@ arrow `p = A.arr : Y ⟶ X`. Let `C` be an `ExpArrCat`, `F : A ⥤ C` a functor 
 `G : A ⟶ C` a morphism of `ExpArrCat`, and `f : F p ⟶ G p` a morphism of arrows whose underlying
 square is a pullback. Then there is a unique natural transformation `α : F ⟶ G` whose components
 at `Y` and `X` are the components of `f`. -/
-theorem IsBiInitial.existsUnique_natTrans {A C : ExpArrCat.{u, u}} (hA : IsBiInitial A)
+theorem IsBiInitial.existsUnique_natTrans_gen {A C : ExpArrCat.{v, max u v}} (hA : IsBiInitial A)
     (F : A.carrier ⥤ C.carrier) [PreservesLimitsOfShape WalkingCospan F] (G : A ⟶ C)
     (f : Arrow.mk (F.map A.arr) ⟶ Arrow.mk (G.functor.map A.arr))
     (hf : IsPullback f.left (F.map A.arr) (G.functor.map A.arr) f.right) :
@@ -448,5 +448,31 @@ theorem IsBiInitial.existsUnique_natTrans {A C : ExpArrCat.{u, u}} (hA : IsBiIni
   let _ : IsExpArr (G.functor.map A.arr) := IsExpArr.ofIso C.arr (G.functor.map A.arr) G.iso.symm
   obtain ⟨α, h₁, h₂⟩ := natTrans_exists (hsq := hf) hA
   exact ⟨α, ⟨h₁, h₂⟩, fun α' h' => natTrans_unique hf hA h'.1 h'.2 h₁ h₂⟩
+
+/-- `IsBiInitial.existsUnique_natTrans_gen` for objects of `ExpArrCat.{u, u}`. -/
+theorem IsBiInitial.existsUnique_natTrans {A C : ExpArrCat.{u, u}} (hA : IsBiInitial A)
+    (F : A.carrier ⥤ C.carrier) [PreservesLimitsOfShape WalkingCospan F] (G : A ⟶ C)
+    (f : Arrow.mk (F.map A.arr) ⟶ Arrow.mk (G.functor.map A.arr))
+    (hf : IsPullback f.left (F.map A.arr) (G.functor.map A.arr) f.right) :
+    ∃! α : F ⟶ G.functor, α.app A.dom = f.left ∧ α.app A.cod = f.right :=
+  IsBiInitial.existsUnique_natTrans_gen.{u, u} hA F G f hf
+
+/-- Variant of `IsBiInitial.existsUnique_natTrans_gen` where the square is given as a morphism of
+arrows to the chosen arrow of `C`, through the isomorphism `G.iso`. -/
+theorem IsBiInitial.existsUnique_natTrans_iso {A C : ExpArrCat.{v, max u v}} (hA : IsBiInitial A)
+    (F : A.carrier ⥤ C.carrier) [PreservesLimitsOfShape WalkingCospan F] (G : A ⟶ C)
+    (f : Arrow.mk (F.map A.arr) ⟶ Arrow.mk C.arr)
+    (hf : IsPullback f.left (F.map A.arr) C.arr f.right) :
+    ∃! α : F ⟶ G.functor, α.app A.dom ≫ G.iso.hom.left = f.left ∧
+      α.app A.cod ≫ G.iso.hom.right = f.right := by
+  have hf' : IsPullback (f ≫ G.iso.inv).left (F.map A.arr) (G.functor.map A.arr)
+      (f ≫ G.iso.inv).right := by
+    exact hf.paste_horiz (IsPullback.of_horiz_isIso ⟨G.iso.inv.w⟩)
+  obtain ⟨α, ⟨h₁, h₂⟩, hu⟩ := hA.existsUnique_natTrans_gen F G (f ≫ G.iso.inv) hf'
+  refine ⟨α, ⟨?_, ?_⟩, fun β hβ => hu β ⟨?_, ?_⟩⟩
+  · rw [h₁, Arrow.comp_left, Category.assoc, ← Arrow.comp_left, Iso.inv_hom_id]; simp
+  · rw [h₂, Arrow.comp_right, Category.assoc, ← Arrow.comp_right, Iso.inv_hom_id]; simp
+  · rw [Arrow.comp_left, ← hβ.1, Category.assoc, ← Arrow.comp_left, Iso.hom_inv_id]; simp
+  · rw [Arrow.comp_right, ← hβ.2, Category.assoc, ← Arrow.comp_right, Iso.hom_inv_id]; simp
 
 end ExpArrCat
