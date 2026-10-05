@@ -41,6 +41,16 @@ import CartexpAristotle.TwoSortFFMain
 import CartexpAristotle.ColaxSliceCartForget
 import CartexpAristotle.FamilyFunctor
 import CartexpAristotle.CharacterisationModelsTwoSort
+import CartexpAristotle.CompExp.Basic
+import CartexpAristotle.CompExp.UniversalNatTrans
+import CartexpAristotle.CompExp.Strictification
+import CartexpAristotle.CompExp.CatWidePullbacks
+import CartexpAristotle.CompExp.TwoSortification
+import CartexpAristotle.CompExp.InitialModel
+import CartexpAristotle.CompExp.BiInitialInduction
+import CartexpAristotle.CompExp.TwoSortificationFullyFaithful
+import CartexpAristotle.CompExp.ColaxSliceCartWidePullbacks
+import CartexpAristotle.CompExp.CharacterisationModelsTwoSort
 
 /-!
 # For Generalised Algebraic Theories, Two Sorts Are Enough
@@ -81,6 +91,17 @@ the Lean declarations.
 * App. C Full faithfulness of two-sortification: `BiInitialInduction`,
   `TwoSortificationFullyFaithful` (Prop. `prop:faithful-at-XGAT-YGAT`), `TwoSortFFSetup`,
   `TwoSortFFCollage`, `TwoSortFFSquare`, `TwoSortFFGamma`, `TwoSortFFReadout`, `TwoSortFFMain`.
+
+## The complete variant `CompExp`
+
+The subdirectory `CompExp` contains a variant of the development where `Lexp` is replaced by the
+2-category `CompExp` of categories with all `w`-small wide pullbacks (hence, having a terminal
+object, all `w`-small limits) and a chosen exponentiable arrow, and functors preserving them:
+`CompExp.Basic` (definition, completeness `CompExp.hasLimitsOfSize`), `CompExp.UniversalNatTrans`,
+`CompExp.Strictification`, `CompExp.CatWidePullbacks` (wide pullbacks in `Cat`),
+`CompExp.TwoSortification`, `CompExp.InitialModel` (initiality), `CompExp.BiInitialInduction`,
+`CompExp.TwoSortificationFullyFaithful` (full faithfulness), `CompExp.ColaxSliceCartWidePullbacks`
+and `CompExp.CharacterisationModelsTwoSort`.
 
 Not formalised: §3.2 (family GATs, Prop. `prop:family-gats`), Prop. `prop:core_projection_preserves_initial`
 of §5.1, App. A.2, App. D (infinite GATs), and the description of `FinGat` as a syntactic category

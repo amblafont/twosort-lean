@@ -1,3 +1,25 @@
+# Summary of changes for run 001e401b-5c7e-4e36-b59a-676308b6e6bf
+I defined the 2-category `CompExp` in a new subdirectory `CartexpAristotle/CompExp/` and ported the initiality proof, the full-faithfulness proof and `CharacterisationModelsTwoSort.lean` to it. `lake build CartexpAristotle` succeeds with no `sorry` and no new axioms. `#print axioms` on the main results lists only `propext`, `Classical.choice` and `Quot.sound`.
+
+**Definition** (`CompExp/Basic.lean`). I used your second suggestion and added a field rather than replacing pullbacks: `structure CompExp extends Lexp` with an extra field `[hasWidePullbacks : HasWidePullbacks.{w} carrier]`. A morphism `CompExp.Hom` is a `Lexp.Hom` that also preserves `w`-small wide pullbacks. The 2-cells are the same as in `Lexp`. The file also gives `CompExp` its strict bicategory structure and proves completeness: `CompExp.hasLimitsOfSize` says every object has all `w`-small limits.
+
+**Main results** (each applies to a bi-initial `FinGat : CompExp.{w, w+1, w+2}`):
+- **Initiality:** `CompExp.modelFunctor_hasInitial` (`CompExp/InitialModel.lean`). Assuming `FinGat`'s hom-types are `w`-small, every category of models `M a` has an initial object.
+- **Full faithfulness:** `CompExp.twoSortificationFullyFaithful` (`CompExp/TwoSortificationFullyFaithful.lean`), under the same smallness assumption.
+- **Characterisation of models:** `CompExp.modelsTwoSortIso` (`CompExp/CharacterisationModelsTwoSort.lean`). This includes compatibility with the projections to `Fam`, naturality in `Γ`, and the core projection result `modelsTwoSortIso_hom_comp_coreProjectionMorphism`.
+
+**Supporting files in `CompExp/`:**
+- `UniversalNatTrans`: bi-initiality and the universal natural transformation.
+- `Strictification`.
+- `CatWidePullbacks`: wide pullbacks in `Cat.{w,w+1}` don't seem to be available for that universe in this Mathlib, so I built them by hand.
+- `TwoSortification`: `CatCompExp`, the endofunctor `Φ`, the model functor and the two-sortification functor.
+- `BiInitialInduction`.
+- `ColaxSliceCartWidePullbacks`: the cartesian colax slice has wide pullbacks and its forgetful functor preserves them.
+
+**Changes to the existing `Lexp` files.** To reuse the long `Lexp` proofs instead of copying them, I made them depend only on a universal-property hypothesis, `Lexp.HasUniversalNatTrans`, rather than on bi-initiality in `Lexp`. `CompExp` bi-initiality implies this hypothesis, and so does `Lexp` bi-initiality, so the original `Lexp` theorems still hold with the same statements. In the full-faithfulness files I also packaged the inputs into a structure, `TwoSortData`. All the `CompExp` modules are imported from `CartexpAristotle.lean`, and I added a paragraph about them to its overview docstring.
+
+The only `sorry` left in the project is inside a comment block in `InitialModelGat.lean` that was already there. I didn't edit `ARISTOTLE_SUMMARY.md`.
+
 # Summary of changes for run c4f234e0-11d6-4f29-9284-ce55596392a1
 No — when I fixed the Lean errors, I only changed Lean files. I've now checked the Markdown files against the current code and updated them.
 
