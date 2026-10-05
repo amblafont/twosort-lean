@@ -473,6 +473,47 @@ theorem IsBiInitial.existsUnique_natTrans {A C : Lexp.{u, u}} (hA : IsBiInitial 
     ∃! α : F ⟶ G.functor, α.app A.dom = f.left ∧ α.app A.cod = f.right :=
   IsBiInitial.existsUnique_natTrans_gen.{u, u} hA F G f hf
 
+/-- The universal property of natural transformations into the underlying functor of a morphism
+`G : A ⟶ C` of `Lexp`: for every pullback-preserving functor `F : A ⥤ C` and every morphism of
+arrows `f : F p ⟶ G p` forming a pullback square, there is a unique natural transformation
+`F ⟶ G` restricting to `f`. By `IsBiInitial.hasUniversalNatTrans`, every morphism out of a
+bi-initial object of `Lexp` has this property.
+
+[Paper, §2.2, Thm. `thm:universal-property-natural-transformation`], as a property of `G`. -/
+def HasUniversalNatTrans {A C : Lexp.{v, u}} (G : A ⟶ C) : Prop :=
+  ∀ (F : A.carrier ⥤ C.carrier) [PreservesLimitsOfShape WalkingCospan F]
+    (f : Arrow.mk (F.map A.arr) ⟶ Arrow.mk (G.functor.map A.arr)),
+    IsPullback f.left (F.map A.arr) (G.functor.map A.arr) f.right →
+    ∃! α : F ⟶ G.functor, α.app A.dom = f.left ∧ α.app A.cod = f.right
+
+/-- Every morphism out of a bi-initial object of `Lexp` has the universal property of natural
+transformations. -/
+theorem IsBiInitial.hasUniversalNatTrans {A C : Lexp.{v, max u v}} (hA : IsBiInitial A)
+    (G : A ⟶ C) : HasUniversalNatTrans G :=
+  fun F _ f hf => hA.existsUnique_natTrans_gen F G f hf
+
+/-- Variant of `HasUniversalNatTrans` where the square is given as a morphism of arrows to the
+chosen arrow of `C`, through the isomorphism `G.iso`.
+
+[Paper, §2.2, Thm. `thm:universal-property-natural-transformation`], variant where the target
+square commutes up to the chosen isomorphism. -/
+theorem HasUniversalNatTrans.existsUnique_iso {A C : Lexp.{v, u}} {G : A ⟶ C}
+    (hG : HasUniversalNatTrans G)
+    (F : A.carrier ⥤ C.carrier) [PreservesLimitsOfShape WalkingCospan F]
+    (f : Arrow.mk (F.map A.arr) ⟶ Arrow.mk C.arr)
+    (hf : IsPullback f.left (F.map A.arr) C.arr f.right) :
+    ∃! α : F ⟶ G.functor, α.app A.dom ≫ G.iso.hom.left = f.left ∧
+      α.app A.cod ≫ G.iso.hom.right = f.right := by
+  have hf' : IsPullback (f ≫ G.iso.inv).left (F.map A.arr) (G.functor.map A.arr)
+      (f ≫ G.iso.inv).right := by
+    exact hf.paste_horiz (IsPullback.of_horiz_isIso ⟨G.iso.inv.w⟩)
+  obtain ⟨α, ⟨h₁, h₂⟩, hu⟩ := hG F (f ≫ G.iso.inv) hf'
+  refine ⟨α, ⟨?_, ?_⟩, fun β hβ => hu β ⟨?_, ?_⟩⟩
+  · rw [h₁, Arrow.comp_left, Category.assoc, ← Arrow.comp_left, Iso.inv_hom_id]; simp
+  · rw [h₂, Arrow.comp_right, Category.assoc, ← Arrow.comp_right, Iso.inv_hom_id]; simp
+  · rw [Arrow.comp_left, ← hβ.1, Category.assoc, ← Arrow.comp_left, Iso.hom_inv_id]; simp
+  · rw [Arrow.comp_right, ← hβ.2, Category.assoc, ← Arrow.comp_right, Iso.hom_inv_id]; simp
+
 /-- Variant of `IsBiInitial.existsUnique_natTrans_gen` where the square is given as a morphism of
 arrows to the chosen arrow of `C`, through the isomorphism `G.iso`.
 
@@ -482,15 +523,7 @@ theorem IsBiInitial.existsUnique_natTrans_iso {A C : Lexp.{v, max u v}} (hA : Is
     (f : Arrow.mk (F.map A.arr) ⟶ Arrow.mk C.arr)
     (hf : IsPullback f.left (F.map A.arr) C.arr f.right) :
     ∃! α : F ⟶ G.functor, α.app A.dom ≫ G.iso.hom.left = f.left ∧
-      α.app A.cod ≫ G.iso.hom.right = f.right := by
-  have hf' : IsPullback (f ≫ G.iso.inv).left (F.map A.arr) (G.functor.map A.arr)
-      (f ≫ G.iso.inv).right := by
-    exact hf.paste_horiz (IsPullback.of_horiz_isIso ⟨G.iso.inv.w⟩)
-  obtain ⟨α, ⟨h₁, h₂⟩, hu⟩ := hA.existsUnique_natTrans_gen F G (f ≫ G.iso.inv) hf'
-  refine ⟨α, ⟨?_, ?_⟩, fun β hβ => hu β ⟨?_, ?_⟩⟩
-  · rw [h₁, Arrow.comp_left, Category.assoc, ← Arrow.comp_left, Iso.inv_hom_id]; simp
-  · rw [h₂, Arrow.comp_right, Category.assoc, ← Arrow.comp_right, Iso.inv_hom_id]; simp
-  · rw [Arrow.comp_left, ← hβ.1, Category.assoc, ← Arrow.comp_left, Iso.hom_inv_id]; simp
-  · rw [Arrow.comp_right, ← hβ.2, Category.assoc, ← Arrow.comp_right, Iso.hom_inv_id]; simp
+      α.app A.cod ≫ G.iso.hom.right = f.right :=
+  (hA.hasUniversalNatTrans G).existsUnique_iso F f hf
 
 end Lexp

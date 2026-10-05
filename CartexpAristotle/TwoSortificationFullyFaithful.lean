@@ -55,20 +55,21 @@ end FBF
 
 namespace Lexp
 
-variable {FinGat : Lexp.{v, max u v}} (hFinGat : IsBiInitial FinGat)
+variable {FinGat B : Lexp.{v, u}} (T : FinGat ⟶ B)
 
-/-- The underlying functor `FinGat ⥤ FinGat / P X` of the two-sortification functor. -/
-noncomputable abbrev twoSortFun := (twoSortification hFinGat).functor
+/-- The underlying functor of `T` (in the application, of the two-sortification functor
+`FinGat ⟶ FinGat / P X`). -/
+noncomputable abbrev twoSortFun := T.functor
 
-/-- The property of an object `b` that, for every object `a`, the two-sortification functor
-induces a bijection `(a ⟶ b) → (T a ⟶ T b)`.
+/-- The property of an object `b` that, for every object `a`, the morphism `T` of `Lexp` (in the
+application, the two-sortification functor) induces a bijection `(a ⟶ b) → (T a ⟶ T b)`.
 
 [Paper, App. C, Prop. `prop:faithful-at-XGAT-YGAT`]: `T` is fully faithful at `b`. -/
 def TwoSortBij (b : FinGat.carrier) : Prop :=
-  ∀ a : FinGat.carrier, Function.Bijective (fun g : a ⟶ b => (twoSortFun hFinGat).map g)
+  ∀ a : FinGat.carrier, Function.Bijective (fun g : a ⟶ b => (twoSortFun T).map g)
 
-lemma twoSortBij_of_iso {b b' : FinGat.carrier} (i : b ≅ b') (hb : TwoSortBij hFinGat b) :
-    TwoSortBij hFinGat b' := by
+lemma twoSortBij_of_iso {b b' : FinGat.carrier} (i : b ≅ b') (hb : TwoSortBij T b) :
+    TwoSortBij T b' := by
   intro a
   constructor
   · intro g₁ g₂ hg
@@ -76,23 +77,23 @@ lemma twoSortBij_of_iso {b b' : FinGat.carrier} (i : b ≅ b') (hb : TwoSortBij 
       (hb a).1 (by simp only [CategoryTheory.Functor.map_comp]; exact congrArg (· ≫ _) hg)
     simpa using congrArg (· ≫ i.hom) this
   · intro h
-    obtain ⟨g, hg⟩ := (hb a).2 (h ≫ (twoSortFun hFinGat).map i.inv)
+    obtain ⟨g, hg⟩ := (hb a).2 (h ≫ (twoSortFun T).map i.inv)
     refine ⟨g ≫ i.hom, ?_⟩
     simp only [CategoryTheory.Functor.map_comp] at hg ⊢
     rw [hg, Category.assoc, ← CategoryTheory.Functor.map_comp, i.inv_hom_id,
       CategoryTheory.Functor.map_id, Category.comp_id]
 
-lemma twoSortBij_terminal : TwoSortBij hFinGat (⊤_ FinGat.carrier) := by
-  have hT : IsTerminal ((twoSortFun hFinGat).obj (⊤_ FinGat.carrier)) :=
+lemma twoSortBij_terminal : TwoSortBij T (⊤_ FinGat.carrier) := by
+  have hT : IsTerminal ((twoSortFun T).obj (⊤_ FinGat.carrier)) :=
     IsTerminal.isTerminalObj _ _ terminalIsTerminal
   intro a
   exact ⟨fun _ _ _ => terminal.hom_ext _ _,
     fun h => ⟨terminal.from a, hT.hom_ext _ _⟩⟩
 
 lemma twoSortBij_pullback {W X₁ X₂ S : FinGat.carrier} {fst : W ⟶ X₁} {snd : W ⟶ X₂}
-    {f : X₁ ⟶ S} {g : X₂ ⟶ S} (hpb : IsPullback fst snd f g) (h₁ : TwoSortBij hFinGat X₁)
-    (h₂ : TwoSortBij hFinGat X₂) (hS : TwoSortBij hFinGat S) : TwoSortBij hFinGat W := by
-  have hTpb := (twoSortFun hFinGat).map_isPullback hpb
+    {f : X₁ ⟶ S} {g : X₂ ⟶ S} (hpb : IsPullback fst snd f g) (h₁ : TwoSortBij T X₁)
+    (h₂ : TwoSortBij T X₂) (hS : TwoSortBij T S) : TwoSortBij T W := by
+  have hTpb := (twoSortFun T).map_isPullback hpb
   intro a
   constructor
   · intro k₁ k₂ hk
@@ -101,11 +102,11 @@ lemma twoSortBij_pullback {W X₁ X₂ S : FinGat.carrier} {fst : W ⟶ X₁} {s
     · exact (h₁ a).1 (by simp only [CategoryTheory.Functor.map_comp, hk])
     · exact (h₂ a).1 (by simp only [CategoryTheory.Functor.map_comp, hk])
   · intro h
-    obtain ⟨k₁, hk₁⟩ := (h₁ a).2 (h ≫ (twoSortFun hFinGat).map fst)
-    obtain ⟨k₂, hk₂⟩ := (h₂ a).2 (h ≫ (twoSortFun hFinGat).map snd)
+    obtain ⟨k₁, hk₁⟩ := (h₁ a).2 (h ≫ (twoSortFun T).map fst)
+    obtain ⟨k₂, hk₂⟩ := (h₂ a).2 (h ≫ (twoSortFun T).map snd)
     simp only at hk₁ hk₂
     have hw : k₁ ≫ f = k₂ ≫ g := (hS a).1 (by
-      change (twoSortFun hFinGat).map (k₁ ≫ f) = (twoSortFun hFinGat).map (k₂ ≫ g)
+      change (twoSortFun T).map (k₁ ≫ f) = (twoSortFun T).map (k₂ ≫ g)
       rw [CategoryTheory.Functor.map_comp, CategoryTheory.Functor.map_comp, hk₁, hk₂,
         Category.assoc, Category.assoc, ← CategoryTheory.Functor.map_comp,
         ← CategoryTheory.Functor.map_comp, hpb.w])
@@ -114,12 +115,12 @@ lemma twoSortBij_pullback {W X₁ X₂ S : FinGat.carrier} {fst : W ⟶ X₁} {s
     · simp only [← CategoryTheory.Functor.map_comp, IsPullback.lift_fst, hk₁]
     · simp only [← CategoryTheory.Functor.map_comp, IsPullback.lift_snd, hk₂]
 
-lemma twoSortBij_exp (c : FinGat.carrier) (hX : TwoSortBij hFinGat FinGat.cod)
-    (hc : TwoSortBij hFinGat c) :
-    TwoSortBij hFinGat (IsExpArr.isExpArrowData (u := FinGat.arr) c).P := by
+lemma twoSortBij_exp (c : FinGat.carrier) (hX : TwoSortBij T FinGat.cod)
+    (hc : TwoSortBij T c) :
+    TwoSortBij T (IsExpArr.isExpArrowData (u := FinGat.arr) c).P := by
   intro a
   set d := IsExpArr.isExpArrowData (u := FinGat.arr) c
-  haveI U' : Universal (functor_on (twoSortFun hFinGat) d) :=
+  haveI U' : Universal (functor_on (twoSortFun T) d) :=
     FunctorPreserves.functor_preserves d inferInstance
   constructor
   · intro m₁ m₂ hm
@@ -133,25 +134,25 @@ lemma twoSortBij_exp (c : FinGat.carrier) (hX : TwoSortBij hFinGat FinGat.cod)
     congr 1
     exact SliceExp.FBF_on_mor_congr _ _ hm _ _
   · intro h
-    obtain ⟨x, hx⟩ := (hX a).2 (h ≫ (twoSortFun hFinGat).map d.pi)
+    obtain ⟨x, hx⟩ := (hX a).2 (h ≫ (twoSortFun T).map d.pi)
     simp only at hx
     let K := SliceExp.chosenOfIsPullback (IsPullback.of_hasPullback FinGat.arr x)
-    have e : (twoSortFun hFinGat).map x = h ≫ (functor_on (twoSortFun hFinGat) d).pi := hx
+    have e : (twoSortFun T).map x = h ≫ (functor_on (twoSortFun T) d).pi := hx
     obtain ⟨g, hg⟩ := (hc K.pullback).2
-      (FBF_on_mor (functor_on (twoSortFun hFinGat) d) (functPullback (twoSortFun hFinGat) K) e ≫
-        (twoSortFun hFinGat).map d.epsilon)
+      (FBF_on_mor (functor_on (twoSortFun T) d) (functPullback (twoSortFun T) K) e ≫
+        (twoSortFun T).map d.epsilon)
     simp only at hg
     refine ⟨Universal.mor (data := d) (Kuf := K) g, ?_⟩
     have hs : x = Universal.mor (data := d) (Kuf := K) g ≫ d.pi :=
       Universal.isSlice (data := d) (Kuf := K) g
-    have e' : (twoSortFun hFinGat).map x = (twoSortFun hFinGat).map
-        (Universal.mor (data := d) (Kuf := K) g) ≫ (functor_on (twoSortFun hFinGat) d).pi := by
-      change _ = _ ≫ (twoSortFun hFinGat).map d.pi
+    have e' : (twoSortFun T).map x = (twoSortFun T).map
+        (Universal.mor (data := d) (Kuf := K) g) ≫ (functor_on (twoSortFun T) d).pi := by
+      change _ = _ ≫ (twoSortFun T).map d.pi
       rw [← CategoryTheory.Functor.map_comp, ← hs]
-    apply Universal.uniq (data := functor_on (twoSortFun hFinGat) d)
-      (functPullback (twoSortFun hFinGat) K) e' e
-    change _ ≫ (twoSortFun hFinGat).map d.epsilon = _ ≫ (twoSortFun hFinGat).map d.epsilon
-    rw [← map_FBF_on_mor (twoSortFun hFinGat) d K hs, ← CategoryTheory.Functor.map_comp,
+    apply Universal.uniq (data := functor_on (twoSortFun T) d)
+      (functPullback (twoSortFun T) K) e' e
+    change _ ≫ (twoSortFun T).map d.epsilon = _ ≫ (twoSortFun T).map d.epsilon
+    rw [← map_FBF_on_mor (twoSortFun T) d K hs, ← CategoryTheory.Functor.map_comp,
       ← Universal.comm (data := d) (Kuf := K) g, hg]
 
 end Lexp

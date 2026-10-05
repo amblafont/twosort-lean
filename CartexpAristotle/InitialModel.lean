@@ -193,13 +193,13 @@ lemma hf0 : IsPullback (f0 a).left ((H a).map A.arr) CatLexp.{w}.arr (f0 a).righ
   isPullback_pointify ((H a).map A.arr) (f0Right a) (fun t => tm a t) (fun f => f0_sec_map a f)
     (f0_crit a)
 
-variable {a} (G : A ⟶ CatLexp.{w}) (hA : IsBiInitial A)
+variable {a} (G : A ⟶ CatLexp.{w}) (hA : HasUniversalNatTrans G)
 include hA
 
 lemma existsUnique_alpha : ∃! α : H a ⟶ G.functor, α.app A.dom ≫ G.iso.hom.left = (f0 a).left ∧
     α.app A.cod ≫ G.iso.hom.right = (f0 a).right :=
   haveI := preservesPullbacks_H a
-  IsBiInitial.existsUnique_natTrans_iso.{w + 1, w + 2} hA (H a) G (f0 a) (hf0 a)
+  hA.existsUnique_iso (H a) (f0 a) (hf0 a)
 
 /-- The natural transformation from `Disc (a ⟶ -)` to the models defining the term model.
 

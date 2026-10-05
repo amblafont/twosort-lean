@@ -50,7 +50,7 @@ lemma map_comp_heq {Γ Γ' Γ'' : A.carrier} (σ : Γ ⟶ Γ') (τ : Γ' ⟶ Γ'
   (heq_of_eq (Functor.congr_hom (congrArg Cat.Hom.toFunctor (G.functor.map_comp σ τ)) g)).trans
     (conj_heq _ _ _)
 
-variable (hA : IsBiInitial A) {ω : Mod G a} (g : zero G hA ⟶ ω)
+variable (hA : HasUniversalNatTrans G) {ω : Mod G a} (g : zero G hA ⟶ ω)
 
 /-- The components of `g` along the morphisms `σ : a ⟶ Γ`. -/
 def theta (Γ : A.carrier) :

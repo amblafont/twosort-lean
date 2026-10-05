@@ -40,14 +40,14 @@ open SemanticTwoSortFunctor PointedForget SliceExp
 noncomputable section
 
 variable {A : Lexp.{w + 1, w + 2}} [LocallySmall.{w} A.carrier] (G : A ⟶ C₀.{w})
-  {a : A.carrier} (K : GL G a) (hA : IsBiInitial A)
+  {a : A.carrier} (K : GL G a) (hA : HasUniversalNatTrans G)
 
 include hA in
 lemma existsUnique_gammaT : ∃! γ : D G K ⟶ G.functor,
     γ.app A.dom ≫ G.iso.hom.left = (sq G K).left ∧
       γ.app A.cod ≫ G.iso.hom.right = (sq G K).right :=
   haveI := preservesPullbacks_D G K
-  IsBiInitial.existsUnique_natTrans_iso.{w + 1, w + 2} hA (D G K) G (sq G K) (isPullback_sq G K)
+  hA.existsUnique_iso (D G K) (sq G K) (isPullback_sq G K)
 
 /-- The natural transformation out of the collage given by bi-initiality. -/
 def gammaT : D G K ⟶ G.functor := (existsUnique_gammaT G K hA).exists.choose
@@ -77,7 +77,7 @@ lemma iota₂_sqY : (iota₂ G K).app A.dom ≫ sqY G K = G.iso.hom.left := by
     rfl
 
 lemma gamma_restrict₂ : iota₂ G K ≫ gammaT G K hA = 𝟙 G.functor := by
-  have hu := IsBiInitial.existsUnique_natTrans_iso.{w + 1, w + 2} hA G.functor G G.iso.hom
+  have hu := hA.existsUnique_iso G.functor G.iso.hom
     (isPullback_G₀ G)
   refine hu.unique ⟨?_, ?_⟩ ⟨by simp, by simp⟩
   · rw [NatTrans.comp_app, Category.assoc, gammaT_left]

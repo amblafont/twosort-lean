@@ -43,13 +43,30 @@ open SemanticTwoSortFunctor PointedForget SliceExp InitialModel
 
 noncomputable section
 
-variable {FinGat : Lexp.{w + 1, w + 2}} (hFinGat : IsBiInitial FinGat)
+/-- The data from which the full faithfulness of the two-sortification functor is proved: a
+morphism `tw : FinGat ⟶ Φ FinGat` (the two-sortification functor) and a morphism
+`mf : FinGat ⟶ CatLexp` (the model functor), such that `mf` and `tw ≫ Φ mf` have the universal
+property of natural transformations (`HasUniversalNatTrans`).
+
+For a bi-initial `FinGat` of `Lexp`, this is `Lexp.twoSortData`; the same data is available for a
+bi-initial object of `CompExp`, so the proof applies to both. -/
+structure TwoSortData (FinGat : Lexp.{w + 1, w + 2}) where
+  /-- The two-sortification functor. -/
+  tw : FinGat ⟶ Φobj.{w + 1, w + 2} FinGat
+  /-- The model functor. -/
+  mf : FinGat ⟶ CatLexp.{w}
+  /-- The universal property of natural transformations into `mf`. -/
+  univM : HasUniversalNatTrans mf
+  /-- The universal property of natural transformations into `tw ≫ Φ mf`. -/
+  univG : HasUniversalNatTrans (tw ≫ Φmap.{w + 1, w + 2} mf)
+
+variable {FinGat : Lexp.{w + 1, w + 2}} (hFinGat : TwoSortData FinGat)
 
 /-- The two-sortification functor. -/
-abbrev Tw : FinGat ⟶ Φobj.{w + 1, w + 2} FinGat := twoSortification.{w + 1, w + 2} hFinGat
+abbrev Tw : FinGat ⟶ Φobj.{w + 1, w + 2} FinGat := hFinGat.tw
 
 /-- The model functor. -/
-abbrev Mf : FinGat ⟶ CatLexp.{w} := modelFunctor hFinGat
+abbrev Mf : FinGat ⟶ CatLexp.{w} := hFinGat.mf
 
 /-- The functor `Γ ↦ Mod (T Γ)`, over families of types.
 
@@ -153,13 +170,13 @@ lemma AY_arr (h : (Tw hFinGat).functor.obj a ⟶ (Tw hFinGat).functor.obj FinGat
 
 /-- The initial model of `T a`. -/
 abbrev Zm (a : FinGat.carrier) : GL (GT hFinGat) a :=
-  zero (a := ((Tw hFinGat).functor.obj a).left) (Mf hFinGat) hFinGat
+  zero (a := ((Tw hFinGat).functor.obj a).left) (Mf hFinGat) hFinGat.univM
 
 lemma pt_zero (A : ((Tw hFinGat).functor.obj a).left ⟶ FinGat.dom) :
     (pt (Mf hFinGat)).obj (((Mf hFinGat).functor.map A).toFunctor.obj (Zm (hFinGat := hFinGat) a)) =
       (⟨Tm _ (A ≫ FinGat.arr), tm _ A⟩ : Pointed.{w}) := by
   rw [← alpha_obj]
-  exact Functor.congr_obj (congrArg Cat.Hom.toFunctor (alpha_left (Mf hFinGat) hFinGat)) A
+  exact Functor.congr_obj (congrArg Cat.Hom.toFunctor (alpha_left (Mf hFinGat) hFinGat.univM)) A
 
 /-- The image of the initial model by `h : T a ⟶ T X` determines `h`.
 

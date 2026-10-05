@@ -117,12 +117,13 @@ lemma modelHasInitial_exp (c : FinGat.carrier) (hc : ModelHasInitial hFinGat c) 
 /-- **The images of the model functor have initial objects.** For every object `a` of a
 bi-initial `FinGat` whose hom-types are `w`-small, the category `M a` has an initial object, where
 `M` is the model functor. The initial object is the term model
-`Lexp.InitialModel.zero (modelFunctor hFinGat) hFinGat`.
+`Lexp.InitialModel.zero (modelFunctor hFinGat) _`.
 
 [Paper, App. B, Cor. `cor:initial-model-gat`]. -/
 theorem modelFunctor_hasInitial [LocallySmall.{w} FinGat.carrier] (a : FinGat.carrier) :
     HasInitial ((modelFun hFinGat).obj a) :=
-  (InitialModel.isInitialZero (a := a) (modelFunctor hFinGat) hFinGat).hasInitial
+  (InitialModel.isInitialZero (a := a) (modelFunctor hFinGat)
+    (IsBiInitial.hasUniversalNatTrans.{w + 1, w + 2} hFinGat _)).hasInitial
 
 /-
 The earlier inductive approach (via `Lexp.IsBiInitial.induction`) needed the following

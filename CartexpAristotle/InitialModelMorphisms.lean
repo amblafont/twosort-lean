@@ -192,13 +192,13 @@ end Beta
 
 section Gamma
 
-variable (hA : IsBiInitial A) (ω : Mod G a)
+variable (hA : HasUniversalNatTrans G) (ω : Mod G a)
 include hA
 
 lemma existsUnique_gamma : ∃! γ : K G ω ⟶ G.functor,
     γ.app A.dom ≫ G.iso.hom.left = (f1 G ω).left ∧ γ.app A.cod ≫ G.iso.hom.right = (f1 G ω).right :=
   haveI := preservesPullbacks_K G ω
-  IsBiInitial.existsUnique_natTrans_iso.{w + 1, w + 2} hA (K G ω) G (f1 G ω) (hf1 G ω)
+  hA.existsUnique_iso (K G ω) (f1 G ω) (hf1 G ω)
 
 /-- The natural transformation out of the collage given by bi-initiality. -/
 def gamma : K G ω ⟶ G.functor := (existsUnique_gamma G hA ω).exists.choose
@@ -223,7 +223,7 @@ lemma gamma_restrict₁ : Collage.ι₁ (beta G ω) ≫ gamma G hA ω = alpha G 
     rw [gamma_right]; rfl
 
 lemma gamma_restrict₂ : Collage.ι₂ (beta G ω) ≫ gamma G hA ω = 𝟙 G.functor := by
-  have hu := IsBiInitial.existsUnique_natTrans_iso.{w + 1, w + 2} hA G.functor G G.iso.hom
+  have hu := hA.existsUnique_iso G.functor G.iso.hom
     (isPullback_G G)
   refine hu.unique ⟨?_, ?_⟩ ⟨by simp, by simp⟩
   · rw [NatTrans.comp_app, Category.assoc]
