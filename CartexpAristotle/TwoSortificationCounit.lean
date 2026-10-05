@@ -25,28 +25,28 @@ We define a natural transformation (`ExpArrCat.twoSortCounit`)
 `twoSortification ⋙ Over.forget (P X) ⟶ 𝟭 FinGat`
 whose components at `Y` and `X` are the horizontal sides of this pullback square, transported
 along the identification of the image of `p` under the two-sortification functor with `p'`.
-It is obtained from `ExpArrCat.IsBiInitial.existsUnique_natTrans`, and is unique with this
+It is obtained from `ExpArrCat.IsBiInitial.existsUnique_natTrans_gen`, and is unique with this
 property (`ExpArrCat.twoSortCounit_unique`).
 -/
 
 open CategoryTheory Limits SliceExp
 
-universe u
+universe v u
 
 namespace ExpArrCat
 
 /-- The pullback square defining the chosen arrow of `Φ A`, as a morphism of arrows from
 `p' : Y' ⟶ Y ×_X P X` to `p : Y ⟶ X`. -/
-noncomputable def ΦchosenSquare (A : ExpArrCat.{u, u}) : Arrow.mk (su' A.arr) ⟶ Arrow.mk A.arr :=
+noncomputable def ΦchosenSquare (A : ExpArrCat.{v, max u v}) : Arrow.mk (su' A.arr) ⟶ Arrow.mk A.arr :=
   Arrow.homMk (pullback.fst A.arr (sE A.arr)) (sE A.arr) (shpb A.arr).w
 
-@[simp] lemma ΦchosenSquare_left (A : ExpArrCat.{u, u}) :
+@[simp] lemma ΦchosenSquare_left (A : ExpArrCat.{v, max u v}) :
     (ΦchosenSquare A).left = pullback.fst A.arr (sE A.arr) := rfl
 
-@[simp] lemma ΦchosenSquare_right (A : ExpArrCat.{u, u}) :
+@[simp] lemma ΦchosenSquare_right (A : ExpArrCat.{v, max u v}) :
     (ΦchosenSquare A).right = sE A.arr := rfl
 
-variable {FinGat : ExpArrCat.{u, u}} (hFinGat : IsBiInitial FinGat)
+variable {FinGat : ExpArrCat.{v, max u v}} (hFinGat : IsBiInitial FinGat)
 
 /-- The composite of the two-sortification functor `FinGat ⥤ Φ FinGat = FinGat / P X` with the
 projection `FinGat / P X ⥤ FinGat`. -/
@@ -96,7 +96,7 @@ theorem existsUnique_twoSortCounit :
     ∃! α : twoSortProj hFinGat ⟶ (𝟙 FinGat : FinGat ⟶ FinGat).functor,
       α.app FinGat.dom = (twoSortSquare hFinGat).left ∧
         α.app FinGat.cod = (twoSortSquare hFinGat).right :=
-  hFinGat.existsUnique_natTrans (twoSortProj hFinGat) (𝟙 FinGat) (twoSortSquare hFinGat)
+  hFinGat.existsUnique_natTrans_gen (twoSortProj hFinGat) (𝟙 FinGat) (twoSortSquare hFinGat)
     (twoSortSquare_isPullback hFinGat)
 
 /-- **The counit of the two-sortification functor**: the natural transformation from the composite
