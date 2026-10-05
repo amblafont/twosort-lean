@@ -51,6 +51,13 @@ import CartexpAristotle.CompExp.BiInitialInduction
 import CartexpAristotle.CompExp.TwoSortificationFullyFaithful
 import CartexpAristotle.CompExp.ColaxSliceCartWidePullbacks
 import CartexpAristotle.CompExp.CharacterisationModelsTwoSort
+import CartexpAristotle.InfiniteGat.Pro
+import CartexpAristotle.InfiniteGat.ProExtension
+import CartexpAristotle.InfiniteGat.ExpData
+import CartexpAristotle.InfiniteGat.ProExponentiable
+import CartexpAristotle.InfiniteGat.ProExtendExp
+import CartexpAristotle.InfiniteGat.Limits
+import CartexpAristotle.InfiniteGat.Main
 
 /-!
 # For Generalised Algebraic Theories, Two Sorts Are Enough
@@ -103,7 +110,17 @@ object, all `w`-small limits) and a chosen exponentiable arrow, and functors pre
 `CompExp.TwoSortificationFullyFaithful` (full faithfulness), `CompExp.ColaxSliceCartWidePullbacks`
 and `CompExp.CharacterisationModelsTwoSort`.
 
+## Infinite GATs
+
+The subdirectory `InfiniteGat` proves Thm. `thm:infinite-GATs` of App. D: the pro-completion
+`GatCat` of `FinGat` is bi-initial in `CompExp` (`InfiniteGat.gatCat_isBiInitial`, in
+`InfiniteGat.Main`). Supporting files: `InfiniteGat.Pro` (pro-completion, co-density),
+`InfiniteGat.ProExtension` (extension of finite-limit-preserving functors), `InfiniteGat.ExpData`,
+`InfiniteGat.ProExponentiable` (Cor. `cor:exponentiable-free-filtered`),
+`InfiniteGat.ProExtendExp` (Prop. `prop:lift-lexp-functor`), `InfiniteGat.Limits`.
+
 Not formalised: §3.2 (family GATs, Prop. `prop:family-gats`), Prop. `prop:core_projection_preserves_initial`
-of §5.1, App. A.2, App. D (infinite GATs), and the description of `FinGat` as a syntactic category
+of §5.1, App. A.2, the remaining results of App. D (infinite GATs) beyond
+Thm. `thm:infinite-GATs`, and the description of `FinGat` as a syntactic category
 (here `FinGat` is any bi-initial object of `Lexp`, as allowed by Thm. `thm:uemura`).
 -/

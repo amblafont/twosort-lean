@@ -1,3 +1,26 @@
+# Summary of changes for run d68ccc93-aadc-4c14-b078-9a2b2c95b49d
+I proved Thm. `thm:infinite-GATs` from the appendix in Lean. The main result is `InfiniteGat.gatCat_isBiInitial` in `CartexpAristotle/InfiniteGat/Main.lean`. The full library (`lake build CartexpAristotle`) builds with no errors, there is no `sorry`, and `#print axioms` shows only `propext`, `Classical.choice` and `Quot.sound`.
+
+**What the theorem says.** Take any `FinGat : Lexp.{w, w+1}` that is bi-initial in `Lexp` and whose category is essentially small. Then `GatCat FinGat` is bi-initial in `CompExp`. Here:
+- `GatCat` is the pro-completion `Pro C₀ = (Ind C₀ᵒᵖ)ᵒᵖ` of a small model `C₀` of `FinGat`. Its chosen arrow is \(\mathrm{iGAT}(p_{GAT})\).
+- `CompExp` was already in the project. Its objects are categories with a terminal object and all `w`-small wide pullbacks (the same as all `w`-small limits), plus an exponentiable arrow. Its 1-cells preserve the terminal object and those wide pullbacks, preserve pushforwards along the arrow, and come with an isomorphism to the target's arrow.
+
+**Two points where the Lean version differs from the paper's wording:**
+- **Morphisms.** The paper asks for limit-preserving functors. I proved `InfiniteGat.preservesLimitsOfSize_of_preservesWidePullbacks` in `Limits.lean`: a functor that preserves the terminal object and `w`-small wide pullbacks preserves all `w`-small limits. So the `CompExp` 1-cells are exactly the paper's morphisms.
+- **2-cells.** The paper says a 2-cell is any natural transformation. As with the project's existing `Lexp` 2-cells, a 2-cell here must also commute with the chosen isomorphisms \(F(p) \cong p'\). The theorem is proved for that notion of 2-cell.
+
+**Proof outline (new files in `CartexpAristotle/InfiniteGat/`):**
+- `Pro.lean`: the pro-completion and its embedding. The embedding is full and faithful and preserves finite limits, `Pro C` has all small limits, and every object is a limit of representables.
+- `ProExtension.lean`: any finite-limit-preserving functor `F : C ⥤ D` into a complete category extends to a limit-preserving `proExtend F`. Natural transformations between limit-preserving functors out of `Pro C` correspond exactly to natural transformations between their restrictions to `C`.
+- `ExpData.lean` and `ProExponentiable.lean`: the embedding preserves pushforwards along an exponentiable arrow, and its image is exponentiable in `Pro C` (Cor. `cor:exponentiable-free-filtered`).
+- `ProExtendExp.lean`: `proExtend F` preserves pushforwards along the embedded arrow (Prop. `prop:lift-lexp-functor`).
+- `Main.lean`:
+  - For existence, a `Lexp` morphism `FinGat ⟶ B` is moved to the small model and extended to `GatCat`.
+  - For uniqueness, 2-cells out of `GatCat` are determined by their restrictions along `iGAT`, which bi-initiality of `FinGat` fixes and supplies.
+  - Finally, nonempty hom-categories in which every hom-set has exactly one element are equivalent to the terminal category.
+
+I also added the new modules to `CartexpAristotle.lean` and updated its module overview and `PAPER_REFERENCES.md`. In the Properties table, the main theorem and the limit-preservation lemma are marked proved, and the `GatCat` definition is listed. `ARISTOTLE_SUMMARY.md` was not changed.
+
 # Summary of changes for run 001e401b-5c7e-4e36-b59a-676308b6e6bf
 I defined the 2-category `CompExp` in a new subdirectory `CartexpAristotle/CompExp/` and ported the initiality proof, the full-faithfulness proof and `CharacterisationModelsTwoSort.lean` to it. `lake build CartexpAristotle` succeeds with no `sorry` and no new axioms. `#print axioms` on the main results lists only `propext`, `Classical.choice` and `Quot.sound`.
 

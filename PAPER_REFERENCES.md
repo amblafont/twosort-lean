@@ -88,7 +88,7 @@ itself formalised.
 | App. C.2 Prop. `prop:initial-object-two-sortification`, App. C.3 Prop. `prop:initial-value-fam` | only the consequence `Rd_zero_injective`, `Qd_zero_injective` | `TwoSortFFReadout.lean` |
 | App. C.2 Prop. `prop:section-terms-two-sortification` | `twoSort_full_cod`, `twoSort_full_dom` (via `jHom`) | `TwoSortFFMain.lean`, `TwoSortFFGamma.lean` |
 | App. C.2 final Corollary (\(T\) fully faithful) | `twoSortification_full`, `twoSortificationFullyFaithful` | `TwoSortFFMain.lean` |
-| App. D (infinite GATs) | not formalised | — |
+| App. D, Thm. `thm:infinite-GATs` (infinite GATs) | `InfiniteGat.gatCat_isBiInitial` | `CartexpAristotle/InfiniteGat/Main.lean` |
 
 For the places where the Lean proofs differ from the paper, see `INITIALITY_PROOF_COMPARISON.md`
 and `FULL_FAITHFULNESS_PROOF_COMPARISON.md`.
