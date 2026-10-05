@@ -38,3 +38,6 @@ import CartexpAristotle.TwoSortFFSquare
 import CartexpAristotle.TwoSortFFGamma
 import CartexpAristotle.TwoSortFFReadout
 import CartexpAristotle.TwoSortFFMain
+import CartexpAristotle.FamSliceForget
+import CartexpAristotle.FamilyFunctor
+import CartexpAristotle.TwoSortModels

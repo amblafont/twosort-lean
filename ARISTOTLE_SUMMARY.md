@@ -1,3 +1,102 @@
+# Summary of changes for run a315edfb-bc6a-474d-a20a-163ee14dae67
+I proved both statements in Lean. `lake build CartexpAristotle` succeeds, the three new files contain no `sorry`, and `#print axioms` on the main results shows only `propext`, `Classical.choice` and `Quot.sound`.
+
+**Setting.** `FinGat` is a bi-initial `ExpArrCat.{w+1, w+2}`, `M = modelFunctor` and `T = twoSortification`. No smallness hypothesis is needed for these results.
+
+**Which bi-initial morphism gives \(F_Γ\)** (`CartexpAristotle/FamSliceForget.lean`, `CartexpAristotle/FamilyFunctor.lean`)
+- To put \(F_Γ\) on the category of models of \(Γ\), the projection from the colax slice to `Cat` had to be a morphism of `ExpArrCat`. This wasn't proved before. `FamSliceForget.forgetHom : FamSliceExp ⟶ CatExp` now does this, sending `(C, F)` to `C`.
+  - It preserves pullbacks, using the concrete test for pullbacks in `Cat`.
+  - It preserves the terminal object.
+  - It preserves the exponentiable arrow `UFam`, because the partial exponential of `UFam` lies exactly over the one for `U` in `Cat`.
+- `famFunctor : FinGat ⟶ FamSliceExp` is the bi-initial morphism. It is built from the chosen strict one by transporting along the 2-cell to `M` (the projection is an isofibration, `FamSlice.transportIso`).
+- `famFunctor_comp_forget` proves `famFunctor ≫ forgetHom = M` exactly, as in the paper's Corollary "family-functor-gat".
+- So `familyFunctor Γ : modelCat Γ ⥤ Fam` is \(F_Γ\), defined on the category of models of \(Γ\).
+
+**1. Models of the two-sortification** (`CartexpAristotle/TwoSortModels.lean`)
+- `modelsTwoSortIso Γ : Cat.of (CartComma (famFunctor Γ)) ≅ modelCat ((T Γ).left)` is the isomorphism of categories between \(F_Γ/\mathrm{Fam}\) and the models of the two-sortification of \(Γ\).
+- `modelsTwoSortIso_hom_comp_proj`: it commutes with the projections to `Fam`.
+- `modelsTwoSortIso_natural`: it is natural in \(Γ\).
+- It comes from bi-initiality, by comparing two morphisms `FinGat ⟶ FamOverExp`:
+  - `famFunctor ≫ toOverHom`;
+  - `T ≫ Φ M ≫ famOverHom`, where `famOverHom` is the new morphism identifying `Φ CatExp` with `FamOverExp`.
+
+**2. The projection is the whiskered counit.**
+- `modelsTwoSortIso_hom_comp_counit`: `(modelsTwoSortIso Γ).hom ≫ M.map (twoSortCounit.app Γ)` equals the projection `(M, T, f) ↦ M`.
+- `coreProjection_eq` states the same thing for natural transformations: `coreProjection = whiskerRight twoSortCounit M.functor`.
+- As you suggested, the proof uses `IsBiInitial.existsUnique_natTrans_gen`:
+  - The square of `M ∘ twoSortCounit` at `p` is a pullback, because `M` preserves the counit's pullback square.
+  - Both transformations have the same components at `X` and `Y` (`core_cod`, `core_dom`). These follow from the conditions on the bi-initial 2-cell, together with `ιX_eps`, `ιY_fst`, and how `toOverHom` sends `UFam` to the chosen arrow.
+
+**Change to existing code.** `twoSortCounit` was only defined for `ExpArrCat.{u, u}`, which can't be combined with the model functor in `ExpArrCat.{w+1, w+2}`. I generalized `TwoSortificationCounit.lean` to `ExpArrCat.{v, max u v}` using `existsUnique_natTrans_gen`. The statements are otherwise unchanged and everything that depended on it still builds.
+
+The Properties table now lists the family functor, `forgetHom` together with `famFunctor_comp_forget`, and the two requested results, all marked proved. The entry for `twoSortCounit` is updated for the new universes. Everything is committed.
+
+# Summary of changes for run b490b4b5-b035-4c23-9a88-612516f36416
+This compares my Lean proof that the two-sortification functor \(T\) is fully faithful (`ExpArrCat.twoSortificationFullyFaithful` in `CartexpAristotle/TwoSortFFMain.lean`) with the appendix section "Two-sortification is Fully Faithful". A longer version, with the Lean name for each step, is in the new file `FULL_FAITHFULNESS_PROOF_COMPARISON.md`. I didn't change any Lean code, so I didn't rebuild anything.
+
+**1. Reducing to \(X\) and \(Y\): same idea as the paper.**
+- The paper's Prop. *faithful-at-XGAT-YGAT* argument (a full \(\Lexp\)-subcategory plus bi-initiality) became a general induction principle, `IsBiInitial.induction`.
+- It is applied to the property "`(a ⟶ b) → (T a ⟶ T b)` is bijective for every `a`".
+- One step the paper leaves implicit: closure under exponentials along `p` also needs the base case at `X`.
+
+**2. No rewriting as families.** Lean doesn't use Cor. *faithful-via-terms*, which turns the base cases into "a family morphism is mono/iso". It proves four separate statements: faithful at `X`, full at `X`, faithful at `Y`, full at `Y`. The `Y` cases use the `X` cases first.
+
+**3. Which functor of models.**
+- Lean works with `GT = Φ M ∘ T`, which sends \(Γ\) to the category of models of \(TΓ\).
+- It doesn't use the paper's variant \(\TWb\), Uemura's theorem, or the colax slice. None of these is formalised.
+- The paper chose \(\TWb\) because it describes exactly what happens at \(X\) and \(Y\). Lean gets the same description from the isomorphisms that come with `GT` being a morphism of `ExpArrCat`.
+
+**4. The model \(\M{Ω}\) and faithfulness.**
+- The paper starts from the constant functor \(\hom(Ω,Γ) ↦ \mathrm{Tm}_Ω\). Lean starts from a larger functor: the collage of \(σ ↦ Gσ(K)\) for a model `K`.
+- Its `inl` part is exactly the paper's constant functor. Its arrows from `inl σ` to a model lie over the map that interprets the sorts and terms of \(Ω\) in `K`.
+- Bi-initiality gives a unique natural transformation `gammaT` out of this collage. Then \(\M{Ω}\) is the image of `inl (𝟙 a)`.
+- Faithfulness then works as in the paper: \(B\) (resp. \(t\)) can be read off from what \(TB\) (resp. \(Tt\)) does to \(\M{Ω}\).
+
+**5. The initial model: much less is computed.**
+- The paper describes \(\bang\Z{Ω}\) completely as \(\mathrm{TmEl}_Ω\). That uses Prop. *initial-value-fam*, Lemma *nat-universal-pullback-P* and Prop. *two-sortification-terms-isomorphic*.
+- Lean uses none of these. It needs only one fact about the initial model of the underlying theory of \(TΩ\): the index (resp. element) that a map \(h\) picks out in that model's family determines \(h\).
+- This follows directly from how the initial model is built: the picked index, as a pointed set, is \(\mathrm{Tm}(A' ≫ p)\) pointed at \(A'\).
+
+**6. Fullness: the main difference.** Both proofs rest on the same equation, \(\bang i ≫ ψ = \mathrm{id}\). Here \(i : \Z{Ω} → \M{Ω}\) is the initial morphism and \(ψ\) interprets the sorts and terms of \(Ω\) in \(\Z{Ω}\).
+- **Paper:** proves the equation from the uniqueness of natural transformations into the colax slice. That needs the slice's \(\Lexp\)-structure, pullback squares at \(p\), and the full description of \(\Z{Ω}\).
+- **Lean:** reuses the collage with `K = Z` to get a model morphism \(j : \M{Ω} → \Z{Ω}\) whose family part is exactly \(ψ\).
+  - \(i ≫ j = \mathrm{id}\) because \(\Z{Ω}\) is initial. Applying the family functor gives the equation.
+  - To show \(h : TΩ → TX\) equals some \(TB\): push the index \(h\) picks in \(\Z{Ω}\) along \(i\). This gives a sort \(B\), and the equation says that index is the one \(TB\) picks, so \(h = TB\). For `Y` the same works with elements.
+- So the colax slice is replaced by a collage plus the fact that an initial object has only the identity endomorphism. This is the same trick I used for initial models (see `INITIALITY_PROOF_COMPARISON.md`).
+- The cost moves elsewhere: building the collage, showing it preserves pullbacks, showing its square at \(p\) is a pullback, and a lot of bookkeeping with dependent types.
+
+**7. Size.** Lean assumes `LocallySmall.{w}` so that the term sets fit in `Type w`. The paper doesn't discuss sizes.
+
+# Summary of changes for run dae15eb5-4bcc-4cca-bf80-d0705cca94c8
+This compares my Lean proof that every theory has an initial model (`modelFunctor_hasInitial` in `CartexpAristotle/ModelInitial.lean`, which rests on `InitialModel.isInitialZero`) with the proof in the appendix section "Initial Models of GATs". A longer version, with the Lean names for each step, is in the new file `INITIALITY_PROOF_COMPARISON.md`. I didn't change any Lean code this time.
+
+**1. The candidate model: same idea as the paper.** Bi-initiality gives a unique natural transformation `alpha : Disc (a ⟶ -) ⟶ G`. Its square at `p` sends a sort `B` to \(\mathrm{Tm}(B)\) and a term `t` to \(\mathrm{Tm}(t ≫ p)\) pointed at `t`. The model is `zero = alpha_a (𝟙 a)`, i.e. Yoneda evaluated at the identity. The Lean proof checks four things the paper leaves implicit:
+- The square really is a pullback in `Cat`. This uses a concrete test for pullbacks against `Pointed → Type`: each `z ∈ Tm(B)` comes from exactly one `t`.
+- `Disc (a ⟶ -)` preserves pullbacks.
+- `G p` is only isomorphic to `U : Pointed ⥤ Type`, not equal to it. So I added a variant of the universal property stated through that isomorphism (`IsBiInitial.existsUnique_natTrans_iso`).
+- \(\mathrm{Tm}(B)\) must be shrunk into `Type w`. This is why there is an extra `LocallySmall.{w}` hypothesis.
+
+**2. Existence of a morphism \(0_Ω → ω\): the main difference.**
+- **Paper:** it builds a natural transformation into \(\mathrm{cod}_- ∘ \mathcal M : \FinGat → \CAT^→\). That requires Proposition *arrow-functor-lexp*, a new \(\Lexp\)-structure on \(\CAT^→\) together with its pushforwards, which the paper only sketches.
+- **Lean:** the proof stays in \(\CAT\) and keeps the target `G` with its usual structure. It changes the *source* functor instead, to the collage of `beta ω : Disc (a ⟶ -) ⟶ G` (where `σ ↦ G σ ω`).
+  - At each `Γ`, the collage's objects are the maps `σ : a ⟶ Γ` together with the models of `Γ`. A morphism from `σ` to a model `e` is a morphism `G σ ω ⟶ e`, and there are none in the other direction.
+  - The universal property only needs the source to preserve pullbacks, which I proved for collages. Bi-initiality then gives a unique `gamma : K ω ⟶ G`.
+  - By uniqueness, `gamma` equals `alpha` on the `Disc` part and the identity on the `G` part.
+  - The morphism `zero ⟶ ω` is the image under `gamma` of the canonical cross morphism `inl (𝟙 a) ⟶ inr ω`.
+  - So Proposition *arrow-functor-lexp* is neither needed nor formalised.
+
+**3. Uniqueness.** The paper argues that any \(f\) sends \(t\) to \(⟦t⟧_ω\) (Lemma *model-term-natural* plus \(⟦t⟧_{0_Ω}=t\)), then applies the Yoneda correspondence. Lean does the Yoneda step by hand:
+- Any `g : zero ⟶ ω` gives a natural transformation `gammaOf g` out of the collage, built from `G σ g`.
+- The paper's key observation becomes `el_theta`. It shows that `gammaOf g` has the same square at `p` as `gamma`, so `gammaOf g = gamma`.
+- Evaluating at the cross morphism gives back `g`, so `g = toModel`.
+
+**4. Other differences.**
+- The Lean result holds for any \(\Lexp\)-morphism `G : A ⟶ CatExp` out of a bi-initial `A` with small hom-sets, not only the model functor.
+- An earlier attempt by induction over the objects of `FinGat` was dropped. Its pullback step is false in general: a pullback of categories with initial objects need not have one. That step is commented out in `ModelInitial.lean` with an explanation.
+- The paper's unproved ingredients (pullbacks in `Cat`, pullbacks of pointed sets, collages) are proved in `CatPullbackCriterion.lean`, `PointifyPullback.lean` and `Collage.lean`.
+
+The new file is committed. I didn't rebuild anything this turn because no Lean files changed.
+
 # Summary of changes for run 64e3c058-9509-4b15-904e-42a6349ddd3c
 I proved in Lean that the two-sortification functor `T : FinGat ⥤ FinGat / P X` is fully faithful, following the appendix section "Two-sortification is Fully Faithful". This closes the two base cases (maps into `X` and into `Y`) that were left as `sorry` before. `lake build CartexpAristotle` succeeds. `#print axioms ExpArrCat.twoSortificationFullyFaithful` shows only `propext`, `Classical.choice` and `Quot.sound`. The only `sorry` left in the project is inside a commented-out block in `ModelInitial.lean`.
 
