@@ -11,7 +11,7 @@ import CartexpAristotle.TwoSortificationFullyFaithful
 
 Let `FinGat` be bi-initial with `w`-small hom-types, `T` the two-sortification functor and `M`
 the model functor. We apply the results of `CartexpAristotle.TwoSortFFGamma` to the morphism
-`GT = T ≫ Φ M : FinGat ⟶ Φ CatExp`, which sends a theory `Γ` to the category of models of the
+`GT = T ≫ Φ M : FinGat ⟶ Φ CatLexp`, which sends a theory `Γ` to the category of models of the
 two-sortified theory `T Γ` over families of types (the functor `Γ ↦ Mod (T Γ)` of the appendix).
 
 For a morphism `h : T a ⟶ T X` (resp. `h : T a ⟶ T Y`) and a model `K` of `T a`, the image of `K`
@@ -19,29 +19,41 @@ by `h` is a family with an index `Rd K h` (resp. a pointed type `Qd K h`). For t
 `Z` of `T a` (from `CartexpAristotle.InitialModel`), these determine `h`
 (`Rd_zero_injective`, `Qd_zero_injective`): this is the computation of the initial model
 (Proposition "initial-value-fam" of the appendix).
+
+## References
+
+* [Paper, App. C.2, Prop. `prop:initial-object-two-sortification`] and
+  [Paper, App. C.3, Prop. `prop:initial-value-fam`]: only the consequence needed for fullness is
+  proved, namely that a morphism `T Ω ⟶ T X` (resp. `T Ω ⟶ T Y`) is determined by its value on the
+  initial model (`Rd_zero_injective`, `Qd_zero_injective`).
+* `GT = T ≫ Φ M` is the functor `Γ ↦ Mod(T Γ)` of [Paper, §4.2, Cor.
+  `cor:models-two-sortification-lexp-functor`], used here instead of `TWb` of
+  [Paper, App. C.1, Notation before Prop. `prop:model-faithful`].
 -/
 
 open CategoryTheory Limits
 
 universe w
 
-namespace ExpArrCat
+namespace Lexp
 
 namespace TwoSortFF
 
-open FamOverExpArr PointedForget SliceExp InitialModel
+open SemanticTwoSortFunctor PointedForget SliceExp InitialModel
 
 noncomputable section
 
-variable {FinGat : ExpArrCat.{w + 1, w + 2}} (hFinGat : IsBiInitial FinGat)
+variable {FinGat : Lexp.{w + 1, w + 2}} (hFinGat : IsBiInitial FinGat)
 
 /-- The two-sortification functor. -/
 abbrev Tw : FinGat ⟶ Φobj.{w + 1, w + 2} FinGat := twoSortification.{w + 1, w + 2} hFinGat
 
 /-- The model functor. -/
-abbrev Mf : FinGat ⟶ CatExp.{w} := modelFunctor hFinGat
+abbrev Mf : FinGat ⟶ CatLexp.{w} := modelFunctor hFinGat
 
-/-- The functor `Γ ↦ Mod (T Γ)`, over families of types. -/
+/-- The functor `Γ ↦ Mod (T Γ)`, over families of types.
+
+[Paper, §4.2, Cor. `cor:models-two-sortification-lexp-functor`]: `Γ ↦ Mod(T Γ)`. -/
 abbrev GT : FinGat ⟶ C₀.{w} := Tw hFinGat ≫ Φmap.{w + 1, w + 2} (Mf hFinGat)
 
 /-- The action of a morphism `h : T a ⟶ T Γ` on the models. -/
@@ -149,7 +161,9 @@ lemma pt_zero (A : ((Tw hFinGat).functor.obj a).left ⟶ FinGat.dom) :
   rw [← alpha_obj]
   exact Functor.congr_obj (congrArg Cat.Hom.toFunctor (alpha_left (Mf hFinGat) hFinGat)) A
 
-/-- The image of the initial model by `h : T a ⟶ T X` determines `h`. -/
+/-- The image of the initial model by `h : T a ⟶ T X` determines `h`.
+
+Consequence of [Paper, App. C.3, Prop. `prop:initial-value-fam`]. -/
 lemma Rd_zero_injective
     {h h' : (Tw hFinGat).functor.obj a ⟶ (Tw hFinGat).functor.obj FinGat.cod}
     (e : Rd (Zm a) h = Rd (Zm a) h') : h = h' := by
@@ -164,7 +178,9 @@ lemma Rd_zero_injective
     · rw [Category.assoc, Category.assoc, Tw_iso_right_sW, Over.w h, Over.w h']
   exact (cancel_mono _).1 this
 
-/-- The image of the initial model by `h : T a ⟶ T Y` determines `h`, given `h ≫ T p`. -/
+/-- The image of the initial model by `h : T a ⟶ T Y` determines `h`, given `h ≫ T p`.
+
+Consequence of [Paper, App. C.3, Prop. `prop:initial-value-fam`]. -/
 lemma Qd_zero_injective
     {h h' : (Tw hFinGat).functor.obj a ⟶ (Tw hFinGat).functor.obj FinGat.dom}
     (hp : h ≫ (Tw hFinGat).functor.map FinGat.arr = h' ≫ (Tw hFinGat).functor.map FinGat.arr)
@@ -188,4 +204,4 @@ end
 
 end TwoSortFF
 
-end ExpArrCat
+end Lexp

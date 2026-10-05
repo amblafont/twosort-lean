@@ -3,15 +3,15 @@ Copyright (c) 2026 Lean Contributor. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Lean Contributor
 -/
-import CartexpAristotle.FinGAT
+import CartexpAristotle.UniversalNatTrans
 import CartexpAristotle.SliceExponentiable
 import Mathlib.CategoryTheory.Limits.FullSubcategory
 import Mathlib.CategoryTheory.Limits.Preserves.Shapes.Pullbacks
 
 /-!
-# Induction over the objects of a bi-initial `ExpArrCat`
+# Induction over the objects of a bi-initial `Lexp`
 
-Let `A` be a bi-initial object of `ExpArrCat`, with chosen exponentiable arrow `p : Y ⟶ X`.
+Let `A` be a bi-initial object of `Lexp`, with chosen exponentiable arrow `p : Y ⟶ X`.
 Every property `Q` of objects of `A` which
 
 * is invariant under isomorphism,
@@ -20,25 +20,34 @@ Every property `Q` of objects of `A` which
 * is closed under the chosen exponentials along `p`, and
 * holds for `Y` and `X`
 
-holds for every object of `A` (`ExpArrCat.IsBiInitial.induction`).
+holds for every object of `A` (`Lexp.IsBiInitial.induction`).
 
-The proof: the full subcategory on the objects satisfying `Q` is again an object of `ExpArrCat`
-(`ExpArrCat.InductiveProperty.subExp`), and its inclusion into `A` is a morphism of `ExpArrCat`.
+The proof: the full subcategory on the objects satisfying `Q` is again an object of `Lexp`
+(`Lexp.InductiveProperty.subExp`), and its inclusion into `A` is a morphism of `Lexp`.
 By bi-initiality there is a morphism `s` from `A` to it, and the composite of `s` with the
 inclusion is isomorphic to the identity of `A`; so every object of `A` is isomorphic to an object
 satisfying `Q`.
+
+## References
+
+* [Paper, App. C, proof of Prop. `prop:faithful-at-XGAT-YGAT`]: "we show that `FinGat` is equal
+  to its full subcategory `S` spanned by theories `Γ` such that ...": a full `Lexp`-subcategory
+  containing `p` and closed under finite limits and pushforwards is everything, by bi-initiality.
+  `Lexp.IsBiInitial.induction` is this argument for an arbitrary property of objects.
+* The same argument is used in [Paper, §3.2, Corollary after Prop. `prop:family-gats`] (the
+  two-sortification of a GAT is a family GAT).
 -/
 
 open CategoryTheory Limits
 
 universe v u
 
-namespace ExpArrCat
+namespace Lexp
 
-/-- A property of objects of an `ExpArrCat` which is closed under all the constructions of
-`ExpArrCat` (isomorphisms, the terminal object, pullbacks, the chosen exponentials along the
+/-- A property of objects of an `Lexp` which is closed under all the constructions of
+`Lexp` (isomorphisms, the terminal object, pullbacks, the chosen exponentials along the
 chosen arrow) and holds for the domain and codomain of the chosen arrow. -/
-structure InductiveProperty (A : ExpArrCat.{v, u}) (Q : A.carrier → Prop) : Prop where
+structure InductiveProperty (A : Lexp.{v, u}) (Q : A.carrier → Prop) : Prop where
   of_iso : ∀ {a b : A.carrier}, (a ≅ b) → Q a → Q b
   terminal : Q (⊤_ A.carrier)
   pullback : ∀ {W X₁ X₂ S : A.carrier} {fst : W ⟶ X₁} {snd : W ⟶ X₂} {f : X₁ ⟶ S}
@@ -49,7 +58,7 @@ structure InductiveProperty (A : ExpArrCat.{v, u}) (Q : A.carrier → Prop) : Pr
 
 namespace InductiveProperty
 
-variable {A : ExpArrCat.{v, u}} {Q : A.carrier → Prop} (hQ : InductiveProperty A Q)
+variable {A : Lexp.{v, u}} {Q : A.carrier → Prop} (hQ : InductiveProperty A Q)
 
 /-- The property `Q` as an `ObjectProperty`. -/
 abbrev prop (_ : InductiveProperty A Q) : ObjectProperty A.carrier := Q
@@ -152,8 +161,8 @@ noncomputable instance : IsExpArr hQ.subArr where
   isExpArrowData := hQ.subData
   isExpArrow := hQ.subUniv
 
-/-- The full subcategory on the objects satisfying `Q`, as an object of `ExpArrCat`. -/
-noncomputable def subExp : ExpArrCat.{v, u} where
+/-- The full subcategory on the objects satisfying `Q`, as an object of `Lexp`. -/
+noncomputable def subExp : Lexp.{v, u} where
   carrier := hQ.Sub
   arr := hQ.subArr
 
@@ -166,7 +175,7 @@ noncomputable def ιPreserves : FunctorPreserves hQ.subArr (hQ.prop).ι :=
       (functor_on (hQ.prop).ι (hQ.subData c)).Pbk.condition
       (functor_on (hQ.prop).ι (hQ.subData c)).Pbk.isLimit (by simp; rfl))
 
-/-- The inclusion of the full subcategory, as a morphism of `ExpArrCat`. -/
+/-- The inclusion of the full subcategory, as a morphism of `Lexp`. -/
 noncomputable def ιHom : hQ.subExp ⟶ A where
   functor := (hQ.prop).ι
   preservesPullbacks := inferInstanceAs (PreservesLimitsOfShape WalkingCospan (hQ.prop).ι)
@@ -176,11 +185,13 @@ noncomputable def ιHom : hQ.subExp ⟶ A where
 
 end InductiveProperty
 
-/-- **Induction over the objects of a bi-initial `ExpArrCat`.** A property of objects which is
+/-- **Induction over the objects of a bi-initial `Lexp`.** A property of objects which is
 invariant under isomorphism, holds for the terminal object, is closed under pullbacks and under
 the chosen exponentials along the chosen arrow `p : Y ⟶ X`, and holds for `Y` and `X`, holds for
-every object. -/
-theorem IsBiInitial.induction {A : ExpArrCat.{v, u}} (hA : IsBiInitial A) {Q : A.carrier → Prop}
+every object.
+
+[Paper, App. C, proof of Prop. `prop:faithful-at-XGAT-YGAT`] (full `Lexp`-subcategory argument). -/
+theorem IsBiInitial.induction {A : Lexp.{v, u}} (hA : IsBiInitial A) {Q : A.carrier → Prop}
     (hQ : InductiveProperty A Q) (a : A.carrier) : Q a := by
   obtain ⟨s⟩ := hA.nonempty_hom hQ.subExp
   obtain ⟨e⟩ := hA.nonempty_iso (s ≫ hQ.ιHom) (𝟙 A)
@@ -191,4 +202,4 @@ theorem IsBiInitial.induction {A : ExpArrCat.{v, u}} (hA : IsBiInitial A) {Q : A
       inv_hom_id := congrArg (fun t => t.nat.app a) e.inv_hom_id }
   exact hQ.of_iso i (s.functor.obj a).property
 
-end ExpArrCat
+end Lexp

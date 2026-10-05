@@ -1,24 +1,30 @@
-import CartexpAristotle.FamSliceToOver
-import CartexpAristotle.FamSliceLimits
+import CartexpAristotle.ColaxSliceCartToOver
+import CartexpAristotle.ColaxSliceCartLimits
 import Mathlib.CategoryTheory.Adjunction.Limits
 
 /-!
-# `FamSlice.toOver` is a right adjoint
+# `ColaxSliceCart.toOver` is a right adjoint
 
-The slice `Over (Cat.of Fam)` embeds into `FamSlice` (`FamSlice.ofOver`): a category over `Fam`
-is an object of `FamSlice`, and a functor commuting strictly with the projections to `Fam` is a
-morphism of `FamSlice` whose natural transformation is an identity.
+The slice `Over (Cat.of Fam)` embeds into `ColaxSliceCart` (`ColaxSliceCart.ofOver`): a category over `Fam`
+is an object of `ColaxSliceCart`, and a functor commuting strictly with the projections to `Fam` is a
+morphism of `ColaxSliceCart` whose natural transformation is an identity.
 
-This embedding is left adjoint to `FamSlice.toOver` (`FamSlice.ofOverAdj`): a functor
+This embedding is left adjoint to `ColaxSliceCart.toOver` (`ColaxSliceCart.ofOverAdj`): a functor
 `D ⥤ CartComma X` over `Fam` is the same as a functor `D ⥤ X.cat` together with a pointwise
 cartesian natural transformation into the projection `D ⥤ Fam`.
+
+## References
+
+* [Paper, App. A.4, proof of Prop. `prop:semantic-twosort-functor`]: "the induced functor from
+  `CAT //_c Fam` to `CAT/Fam` can be characterised as the right adjoint of the obvious embedding
+  of `CAT/Fam` into `CAT //_c Fam`" (`ColaxSliceCart.ofOverAdj`).
 -/
 
 universe w
 
 open CategoryTheory Limits
 
-namespace FamSlice
+namespace ColaxSliceCart
 
 lemma eqToHom_isPointwiseCartesian {C : Type*} [Category C] {F G : C ⥤ Fam.{w}} (h : F = G) :
     (eqToHom h).IsPointwiseCartesian := by
@@ -30,8 +36,8 @@ lemma eqToHom_app_base_heq {C : Type*} [Category C] {F G : C ⥤ Fam.{w}} (h : F
   subst h
   rfl
 
-/-- The embedding of the slice of categories over `Fam` into `FamSlice`. -/
-def ofOver : Over (Cat.of Fam.{w}) ⥤ FamSlice.{w, w, w + 1} where
+/-- The embedding of the slice of categories over `Fam` into `ColaxSliceCart`. -/
+def ofOver : Over (Cat.of Fam.{w}) ⥤ ColaxSliceCart.{w, w, w + 1} where
   obj d := ⟨d.left, d.hom.toFunctor⟩
   map {d d'} k :=
     { functor := k.left.toFunctor
@@ -46,7 +52,7 @@ def ofOver : Over (Cat.of Fam.{w}) ⥤ FamSlice.{w, w, w + 1} where
 
 namespace CartComma
 
-variable (X : FamSlice.{w, w, w + 1})
+variable (X : ColaxSliceCart.{w, w, w + 1})
 
 /-- The projection `(c, T, f) ↦ c` of the cartesian comma category to the underlying
 category. -/
@@ -81,8 +87,8 @@ lemma heq_id_eqToHom {C : Type*} [Category C] {A B : C} (h : A = B) :
   subst h; rfl
 
 /-- The counit of the adjunction `ofOver ⊣ toOver`. -/
-def ofOverCounit (X : FamSlice.{w, w, w + 1}) :
-    (⟨Cat.of (CartComma X), CartComma.proj X⟩ : FamSlice.{w, w, w + 1}) ⟶ X where
+def ofOverCounit (X : ColaxSliceCart.{w, w, w + 1}) :
+    (⟨Cat.of (CartComma X), CartComma.proj X⟩ : ColaxSliceCart.{w, w, w + 1}) ⟶ X where
   functor := CartComma.objFunctor X
   nat :=
     { app a := a.hom
@@ -91,7 +97,7 @@ def ofOverCounit (X : FamSlice.{w, w, w + 1}) :
 
 /-- The functor `D ⥤ CartComma (D, q)` sending `x` to the identity of `q x`. -/
 def unitFunctor (d : Over (Cat.of Fam.{w})) :
-    d.left ⥤ CartComma (⟨d.left, d.hom.toFunctor⟩ : FamSlice.{w, w, w + 1}) where
+    d.left ⥤ CartComma (⟨d.left, d.hom.toFunctor⟩ : ColaxSliceCart.{w, w, w + 1}) where
   obj x := ⟨x, d.hom.toFunctor.obj x, 𝟙 _, Fam.Hom.isCartesian_id _⟩
   map {x y} φ := ⟨φ, d.hom.toFunctor.map φ, by
     change d.hom.toFunctor.map φ ≫ 𝟙 _ = 𝟙 _ ≫ d.hom.toFunctor.map φ
@@ -101,7 +107,9 @@ def unitFunctor (d : Over (Cat.of Fam.{w})) :
 def ofOverUnit (d : Over (Cat.of Fam.{w})) : d ⟶ toOver.obj (ofOver.obj d) :=
   Over.homMk (unitFunctor d).toCatHom rfl
 
-/-- The embedding `ofOver` is left adjoint to `toOver`. -/
+/-- The embedding `ofOver` is left adjoint to `toOver`.
+
+[Paper, App. A.4, proof of Prop. `prop:semantic-twosort-functor`]. -/
 def ofOverAdj : ofOver.{w} ⊣ toOver.{w} :=
   Adjunction.mkOfUnitCounit
     { unit :=
@@ -126,12 +134,12 @@ def ofOverAdj : ofOver.{w} ⊣ toOver.{w} :=
         ext X
         rfl }
 
-end FamSlice
+end ColaxSliceCart
 
-namespace FamSlice
+namespace ColaxSliceCart
 
 /-- `toOver` preserves all (small) limits, being a right adjoint. -/
 instance toOver_preservesLimits : PreservesLimitsOfSize.{0, 0} toOver.{w} :=
   ofOverAdj.rightAdjoint_preservesLimits
 
-end FamSlice
+end ColaxSliceCart

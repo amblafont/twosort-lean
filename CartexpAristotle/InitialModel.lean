@@ -3,22 +3,22 @@ Copyright (c) 2026 Lean Contributor. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Lean Contributor
 -/
-import CartexpAristotle.FinGAT
-import CartexpAristotle.FamOverExpArr
+import CartexpAristotle.UniversalNatTrans
+import CartexpAristotle.SemanticTwoSortFunctor
 import CartexpAristotle.Collage
 import CartexpAristotle.PointifyPullback
 
 /-!
 # Initial models
 
-Let `A` (`FinGat`) be a bi-initial object of `ExpArrCat`, with chosen exponentiable arrow
-`p : Y ⟶ X`, whose hom-types are `w`-small, and let `G : A ⟶ CatExp` be a morphism of `ExpArrCat`
+Let `A` (`FinGat`) be a bi-initial object of `Lexp`, with chosen exponentiable arrow
+`p : Y ⟶ X`, whose hom-types are `w`-small, and let `G : A ⟶ CatLexp` be a morphism of `Lexp`
 (e.g. the model functor). For every object `a` of `A`, the category `G a` (the models of `a`) has
 an initial object.
 
 We follow the appendix ("Initial models of GATs"):
 * **Existence of the candidate.** By the universal property of `A` with respect to natural
-  transformations (`ExpArrCat.IsBiInitial.existsUnique_natTrans_iso`), there is a unique natural
+  transformations (`Lexp.IsBiInitial.existsUnique_natTrans_iso`), there is a unique natural
   transformation `α` from `Γ ↦ Disc (a ⟶ Γ)` to `G` whose components at `Y` and `X` are given by
   the term models: `A' : a ⟶ X` is sent to (a set isomorphic to) the set `Tm A'` of `t : a ⟶ Y`
   with `t ≫ p = A'`, and `t : a ⟶ Y` is sent to `Tm (t ≫ p)` pointed by `t`.
@@ -26,15 +26,20 @@ We follow the appendix ("Initial models of GATs"):
 * **Morphisms out of `0`.** For a model `ω`, a morphism `0 ⟶ ω` is encoded as a natural
   transformation out of the collage of `Γ ↦ (σ ↦ G σ ω)`; again such a natural transformation is
   unique, which gives existence and uniqueness of the morphism.
+
+## References
+
+* [Paper, App. B, Notation `not:mor-terms-set`]: `Tm A'` is the set `Tm(A)` of terms of sort `A`.
+* [Paper, App. B, Prop. `prop:initial-model-gat-existence`]: `alpha` and the model `zero` (`0_Ω`).
 -/
 
 open CategoryTheory Limits
 
 universe w
 
-namespace ExpArrCat
+namespace Lexp
 
-open FamOverExpArr PointedForget
+open SemanticTwoSortFunctor PointedForget
 
 /-- A functor sending pullback squares to pullback squares preserves pullbacks. -/
 lemma preservesPullbacks_of_isPullback {C : Type*} [Category C] [HasPullbacks C] {D : Type*}
@@ -59,7 +64,7 @@ lemma types_eqToHom_heq {α β : Type w} (h : α = β) (x : α) : (eqToHom h : �
 
 section Setup
 
-variable {A : ExpArrCat.{w + 1, w + 2}} (G : A ⟶ CatExp.{w})
+variable {A : Lexp.{w + 1, w + 2}} (G : A ⟶ CatLexp.{w})
 
 /-- The category of models of `Y`. -/
 abbrev MY : Cat.{w, w + 1} := G.functor.obj A.dom
@@ -105,9 +110,11 @@ end Setup
 
 section Terms
 
-variable {A : ExpArrCat.{w + 1, w + 2}} [LocallySmall.{w} A.carrier] (a : A.carrier)
+variable {A : Lexp.{w + 1, w + 2}} [LocallySmall.{w} A.carrier] (a : A.carrier)
 
-/-- The set of terms of sort `B`: morphisms `t : a ⟶ Y` with `t ≫ p = B`, shrunk to `Type w`. -/
+/-- The set of terms of sort `B`: morphisms `t : a ⟶ Y` with `t ≫ p = B`, shrunk to `Type w`.
+
+[Paper, App. B, Notation `not:mor-terms-set`]. -/
 def Tm (B : a ⟶ A.cod) : Type w := Shrink.{w} {t : a ⟶ A.dom // t ≫ A.arr = B}
 
 /-- The term given by `t : a ⟶ Y`. -/
@@ -144,7 +151,7 @@ end Terms
 
 section StepA
 
-variable {A : ExpArrCat.{w + 1, w + 2}} [LocallySmall.{w} A.carrier] (a : A.carrier)
+variable {A : Lexp.{w + 1, w + 2}} [LocallySmall.{w} A.carrier] (a : A.carrier)
 
 /-- The functor `Γ ↦ Disc (a ⟶ Γ)`. -/
 abbrev H : A.carrier ⥤ Cat.{w, w + 1} := homDiscFunctor.{w} a
@@ -166,7 +173,7 @@ abbrev f0Left : (H a).obj A.dom ⟶ Cat.of Pointed.{w} :=
   pointifyHom ((H a).map A.arr) (f0Right a) (fun t => tm a t) (fun f => f0_sec_map a f)
 
 /-- The square at `p` defining the term model. -/
-def f0 : Arrow.mk ((H a).map A.arr) ⟶ Arrow.mk CatExp.{w}.arr :=
+def f0 : Arrow.mk ((H a).map A.arr) ⟶ Arrow.mk CatLexp.{w}.arr :=
   Arrow.homMk (f0Left a) (f0Right a) (pointifyHom_comm _ _ _ _)
 
 lemma f0_crit : PointifyCrit ((H a).map A.arr) (f0Right a) (fun t => tm a t) := by
@@ -182,11 +189,11 @@ lemma f0_crit : PointifyCrit ((H a).map A.arr) (f0Right a) (fun t => tm a t) := 
       exact (types_eqToHom_heq (congrArg (fun B => Tm a B) hB) (tm a t)).symm
     exact ⟨Disc.homOfEq e, Disc.hom_ext _ _, fun _ _ => Disc.hom_ext _ _⟩
 
-lemma hf0 : IsPullback (f0 a).left ((H a).map A.arr) CatExp.{w}.arr (f0 a).right :=
+lemma hf0 : IsPullback (f0 a).left ((H a).map A.arr) CatLexp.{w}.arr (f0 a).right :=
   isPullback_pointify ((H a).map A.arr) (f0Right a) (fun t => tm a t) (fun f => f0_sec_map a f)
     (f0_crit a)
 
-variable {a} (G : A ⟶ CatExp.{w}) (hA : IsBiInitial A)
+variable {a} (G : A ⟶ CatLexp.{w}) (hA : IsBiInitial A)
 include hA
 
 lemma existsUnique_alpha : ∃! α : H a ⟶ G.functor, α.app A.dom ≫ G.iso.hom.left = (f0 a).left ∧
@@ -194,7 +201,9 @@ lemma existsUnique_alpha : ∃! α : H a ⟶ G.functor, α.app A.dom ≫ G.iso.h
   haveI := preservesPullbacks_H a
   IsBiInitial.existsUnique_natTrans_iso.{w + 1, w + 2} hA (H a) G (f0 a) (hf0 a)
 
-/-- The natural transformation from `Disc (a ⟶ -)` to the models defining the term model. -/
+/-- The natural transformation from `Disc (a ⟶ -)` to the models defining the term model.
+
+[Paper, App. B, proof of Prop. `prop:initial-model-gat-existence`]. -/
 def alpha : H a ⟶ G.functor := (existsUnique_alpha G hA).exists.choose
 
 lemma alpha_left : (alpha G hA).app A.dom ≫ G.iso.hom.left = (f0 a).left :=
@@ -207,7 +216,9 @@ lemma alpha_unique (α : H a ⟶ G.functor) (h₁ : α.app A.dom ≫ G.iso.hom.l
     (h₂ : α.app A.cod ≫ G.iso.hom.right = (f0 a).right) : α = alpha G hA :=
   (existsUnique_alpha G hA).unique ⟨h₁, h₂⟩ (existsUnique_alpha G hA).exists.choose_spec
 
-/-- **The initial model** (the term model) of `a`. -/
+/-- **The initial model** (the term model) of `a`.
+
+[Paper, App. B, Prop. `prop:initial-model-gat-existence`]: the model `0_Ω`. -/
 def zero : ↑(show Cat.{w, w + 1} from G.functor.obj a) := ((alpha G hA).app a).toFunctor.obj (𝟙 a)
 
 lemma alpha_obj {Γ : A.carrier} (σ : a ⟶ Γ) :
@@ -236,4 +247,4 @@ end
 
 end InitialModel
 
-end ExpArrCat
+end Lexp

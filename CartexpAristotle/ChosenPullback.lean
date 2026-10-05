@@ -8,6 +8,10 @@ and repackaged as an `IsPullback` statement.
 This module is a local stand-in for the `ChosenPullback` structure used by `Basic.lean`,
 since `Mathlib.CategoryTheory.Limits.Shapes.Pullback.ChosenPullback` is not available in the
 Mathlib version this project is pinned to.
+
+## References
+
+* Auxiliary, not in the paper.
 -/
 @[expose] public section
 namespace CategoryTheory.Limits

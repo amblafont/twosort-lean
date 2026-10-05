@@ -5,7 +5,7 @@ Authors: Lean Contributor
 -/
 import Mathlib.CategoryTheory.Comma.Basic
 import Mathlib.CategoryTheory.Limits.Comma
-import CartexpAristotle.ExpArrCat
+import CartexpAristotle.Lexp
 
 /-!
 # Comma categories as categories with a chosen exponentiable arrow
@@ -22,12 +22,18 @@ F X --x--> X'
 ```
 is a pullback. Then the comma category `Comma F (𝟭 C')` is again a category with pullbacks and a
 terminal object, and the morphism `(p, p') : (Y, Y', y) ⟶ (X, X', x)` is exponentiable. This gives
-an `ExpArrCat` structure on `Comma F (𝟭 C')` (`ExpArrCat.comma`).
+an `Lexp` structure on `Comma F (𝟭 C')` (`Lexp.comma`).
+
+## References
+
+* [Paper, App. A.3, Prop. `prop:comma-lexp`] (`Lexp`-structure on the comma category `F/C`):
+  `Lexp.comma`. This is the key ingredient of the proof of
+  [Paper, §2.2, Thm. `thm:universal-property-natural-transformation`].
 -/
 
 open CategoryTheory Limits
 
-namespace CommaExpArr
+namespace CommaLexp
 
 universe v₁ v₂ u₁ u₂
 
@@ -380,18 +386,20 @@ end Universal'
 
 end Exponentiable
 
-end CommaExpArr
+end CommaLexp
 
-open CommaExpArr in
+open CommaLexp in
 /-- Given a functor `F : C ⥤ C'` preserving pullbacks between categories with pullbacks and a
 terminal object, with exponentiable arrows `u : Y ⟶ X` and `u' : Y' ⟶ X'` and maps
 `y : F Y ⟶ Y'`, `x : F X ⟶ X'` making the evident square a pullback, the comma category
-`Comma F (𝟭 C')` is a category with a chosen exponentiable arrow, namely `(u, u')`. -/
-noncomputable def ExpArrCat.comma {C : Type u₁} [Category.{v₁} C] [HasPullbacks C] [HasTerminal C]
+`Comma F (𝟭 C')` is a category with a chosen exponentiable arrow, namely `(u, u')`.
+
+[Paper, App. A.3, Prop. `prop:comma-lexp`]. -/
+noncomputable def Lexp.comma {C : Type u₁} [Category.{v₁} C] [HasPullbacks C] [HasTerminal C]
     {C' : Type u₂} [Category.{v₂} C'] [HasPullbacks C'] [HasTerminal C'] (F : C ⥤ C')
     [PreservesLimitsOfShape WalkingCospan F] {Y X : C} (u : Y ⟶ X) {Y' X' : C'} (u' : Y' ⟶ X')
     [IsExpArr u] [IsExpArr u'] {y : F.obj Y ⟶ Y'} {x : F.obj X ⟶ X'}
-    (hsq : IsPullback y (F.map u) u' x) : ExpArrCat.{max v₁ v₂, max u₁ u₂ v₂} where
+    (hsq : IsPullback y (F.map u) u' x) : Lexp.{max v₁ v₂, max u₁ u₂ v₂} where
   carrier := Comma F (𝟭 C')
   arr := commaArr F u u' hsq
   isExpArr := commaIsExpArr F u u' hsq

@@ -4,35 +4,47 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Lean Contributor
 -/
 import CartexpAristotle.BiInitialDomCod
-import CartexpAristotle.FamOverExpArr
+import CartexpAristotle.SemanticTwoSortFunctor
 
 /-!
 # The two-sortification functor and the model functor
 
-Let `FinGat` be a bi-initial object of the 2-category `ExpArrCat`.
+Let `FinGat` be a bi-initial object of the 2-category `Lexp`.
 
-* `ExpArrCat.IsBiInitial.strictHom`: the chosen strict morphism `FinGat ⟶ B`, for any `B`. It is
-  obtained by strictifying (`ExpArrCat.strictify`) an arbitrary morphism `FinGat ⟶ B`, which is
+* `Lexp.IsBiInitial.strictHom`: the chosen strict morphism `FinGat ⟶ B`, for any `B`. It is
+  obtained by strictifying (`Lexp.strictify`) an arbitrary morphism `FinGat ⟶ B`, which is
   possible since the domain and codomain of the chosen arrow of `FinGat` differ. By bi-initiality it
   is unique up to a unique invertible 2-cell.
-* `ExpArrCat.twoSortification`: the bi-initial strict morphism `FinGat ⟶ Φ FinGat`, where `Φ` is
-  the endofunctor of `ExpArrCat` from `ExpArrEndofunctor`.
-* `ExpArrCat.modelFunctor`: the bi-initial strict morphism `FinGat ⟶ CatExp`, where `CatExp` is
+* `Lexp.twoSortification`: the bi-initial strict morphism `FinGat ⟶ Φ FinGat`, where `Φ` is
+  the endofunctor of `Lexp` from `LexpEndofunctor`.
+* `Lexp.modelFunctor`: the bi-initial strict morphism `FinGat ⟶ CatLexp`, where `CatLexp` is
   `Cat` with the exponentiable arrow `U : Pointed ⥤ Type`.
+
+## References
+
+* [Paper, §2.2, Prop. `prop:strictification`]: `Lexp.IsBiInitial.strictHom` (the strict
+  bi-initial functor).
+* [Paper, §2.2, Definition of the model functor] (after Prop. `prop:CAT`):
+  `Lexp.modelFunctor`.
+* [Paper, §3.1, Def. `def:two-sortification`]: `Lexp.twoSortification`, the strict bi-initial
+  `Lexp`-functor `T : FinGat → FinGat/Fam` (here `Φ FinGat`, see
+  [Paper, §3.1, Props. `prop:p2-construction` and `prop:p2-exponentiable`]).
 -/
 
 open CategoryTheory
 
 universe w v u
 
-namespace ExpArrCat
+namespace Lexp
 
 namespace IsBiInitial
 
-variable {A : ExpArrCat.{v, u}} (hA : IsBiInitial A) (B : ExpArrCat.{v, u})
+variable {A : Lexp.{v, u}} (hA : IsBiInitial A) (B : Lexp.{v, u})
 
-/-- The chosen strict morphism out of a bi-initial `ExpArrCat`: the strictification of some
-morphism `A ⟶ B`. -/
+/-- The chosen strict morphism out of a bi-initial `Lexp`: the strictification of some
+morphism `A ⟶ B`.
+
+[Paper, §2.2, Prop. `prop:strictification`]. -/
 noncomputable def strictHom : A ⟶ B :=
   strictify (Classical.choice (hA.nonempty_hom B)) hA.dom_ne_cod
 
@@ -53,10 +65,12 @@ end IsBiInitial
 
 section TwoSortification
 
-variable {FinGat : ExpArrCat.{v, max u v}} (hFinGat : IsBiInitial FinGat)
+variable {FinGat : Lexp.{v, max u v}} (hFinGat : IsBiInitial FinGat)
 
 /-- **The two-sortification functor**: the bi-initial strict morphism from a bi-initial `FinGat`
-to its image `Φ FinGat` under the endofunctor of `ExpArrCat`. -/
+to its image `Φ FinGat` under the endofunctor of `Lexp`.
+
+[Paper, §3.1, Def. `def:two-sortification`]: the two-sortification functor `T`. -/
 noncomputable def twoSortification : FinGat ⟶ Φ.obj FinGat :=
   hFinGat.strictHom (Φ.obj FinGat)
 
@@ -74,25 +88,27 @@ end TwoSortification
 
 section ModelFunctor
 
-open FamOverExpArr
+open SemanticTwoSortFunctor
 
-variable {FinGat : ExpArrCat.{w + 1, w + 2}} (hFinGat : IsBiInitial FinGat)
+variable {FinGat : Lexp.{w + 1, w + 2}} (hFinGat : IsBiInitial FinGat)
 
 /-- **The model functor**: the bi-initial strict morphism from a bi-initial `FinGat` to `Cat`
-(with the exponentiable arrow `U : Pointed ⥤ Type w`). -/
-noncomputable def modelFunctor : FinGat ⟶ CatExp.{w} :=
-  hFinGat.strictHom CatExp.{w}
+(with the exponentiable arrow `U : Pointed ⥤ Type w`).
+
+[Paper, §2.2, Definition of the model functor]. -/
+noncomputable def modelFunctor : FinGat ⟶ CatLexp.{w} :=
+  hFinGat.strictHom CatLexp.{w}
 
 /-- The model functor is strict: it sends the chosen arrow of `FinGat` exactly to
 `U : Pointed ⥤ Type w`. -/
 theorem modelFunctor_isStrict : (modelFunctor hFinGat).IsStrict :=
   hFinGat.strictHom_isStrict _
 
-/-- Every morphism `FinGat ⟶ CatExp` is isomorphic to the model functor. -/
-theorem nonempty_iso_modelFunctor (F : FinGat ⟶ CatExp.{w}) :
+/-- Every morphism `FinGat ⟶ CatLexp` is isomorphic to the model functor. -/
+theorem nonempty_iso_modelFunctor (F : FinGat ⟶ CatLexp.{w}) :
     Nonempty (F ≅ modelFunctor hFinGat) :=
   hFinGat.nonempty_iso_strictHom _ F
 
 end ModelFunctor
 
-end ExpArrCat
+end Lexp

@@ -11,17 +11,24 @@ import CartexpAristotle.InitialModelMorphisms
 Every morphism `g : zero ⟶ ω` induces a natural transformation `gammaOf g : K ω ⟶ G` satisfying
 the conditions characterising `gamma ω`; hence `gammaOf g = gamma ω`, and `g` is recovered from
 `gamma ω`. This gives uniqueness of morphisms out of `zero`.
+
+## References
+
+* [Paper, App. B, Lemma after Prop. `prop:initial-model-gat-morphism-existence`] (any morphism
+  `0_Ω ⟶ ω` satisfies the characterising condition), using
+  [Paper, App. B, Lemma `lem:model-term-natural`] (`el_theta`).
+* [Paper, App. B, Cor. `cor:initial-model-gat`]: `isInitialZero`.
 -/
 
 open CategoryTheory Limits
 
 universe w
 
-namespace ExpArrCat
+namespace Lexp
 
 namespace InitialModel
 
-open FamOverExpArr PointedForget CatPullback
+open SemanticTwoSortFunctor PointedForget CatPullback
 
 noncomputable section
 
@@ -34,8 +41,8 @@ lemma comp_eqToHom_heq' {C : Type*} [Category C] {x y z : C} (f : x ⟶ y) (e : 
     (f ≫ eqToHom e) ≍ f := by
   subst e; simp
 
-variable {A : ExpArrCat.{w + 1, w + 2}} [LocallySmall.{w} A.carrier] {a : A.carrier}
-  (G : A ⟶ CatExp.{w})
+variable {A : Lexp.{w + 1, w + 2}} [LocallySmall.{w} A.carrier] {a : A.carrier}
+  (G : A ⟶ CatLexp.{w})
 
 lemma map_comp_heq {Γ Γ' Γ'' : A.carrier} (σ : Γ ⟶ Γ') (τ : Γ' ⟶ Γ'') {x y : (show Cat.{w, w + 1} from G.functor.obj Γ)}
     (g : x ⟶ y) : (G.functor.map (σ ≫ τ)).toFunctor.map g ≍
@@ -108,7 +115,9 @@ lemma map_comp_obj {Γ Γ' Γ'' : A.carrier} (σ : Γ ⟶ Γ') (τ : Γ' ⟶ Γ'
       (G.functor.map τ).toFunctor.obj ((G.functor.map σ).toFunctor.obj x) :=
   Functor.congr_obj (congrArg Cat.Hom.toFunctor (G.functor.map_comp σ τ)) x
 
-/-- The key computation: `g` acts on the interpretation of terms as expected. -/
+/-- The key computation: `g` acts on the interpretation of terms as expected.
+
+[Paper, App. B, Lemma `lem:model-term-natural`]. -/
 lemma el_theta {B : a ⟶ A.cod} (z : (el G).obj (((alpha G hA).app A.cod).toFunctor.obj B))
     (s : Tm a B) (h : z ≍ s) : (el G).map ((theta G hA g A.cod).app B) z = termAt G ω s := by
   set t := (tmOf a s).1
@@ -180,13 +189,17 @@ lemma gammaOf_crossHom : ((gammaOf G hA g).app a).toFunctor.map (X := .inl (𝟙
   exact (heq_of_eq (Functor.congr_hom (congrArg Cat.Hom.toFunctor (G.functor.map_id a)) g)).trans
     (conj_heq _ _ _)
 
-/-- **Uniqueness** of morphisms out of the initial model. -/
+/-- **Uniqueness** of morphisms out of the initial model.
+
+[Paper, App. B, Lemma after Prop. `prop:initial-model-gat-morphism-existence`]. -/
 lemma hom_eq_toModel : g = toModel G hA ω := by
   refine eq_of_heq ((gammaOf_crossHom G hA g).symm.trans ?_)
   rw [gammaOf_eq]
   exact (conj_heq _ _ _).symm
 
-/-- **The initial model is initial.** -/
+/-- **The initial model is initial.**
+
+[Paper, App. B, Cor. `cor:initial-model-gat`]. -/
 def isInitialZero : IsInitial (zero (a := a) G hA) :=
   IsInitial.ofUniqueHom (fun ω => toModel G hA ω) (fun ω g => hom_eq_toModel G hA g)
 
@@ -194,4 +207,4 @@ end
 
 end InitialModel
 
-end ExpArrCat
+end Lexp

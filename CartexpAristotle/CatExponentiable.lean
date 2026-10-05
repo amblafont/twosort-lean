@@ -16,6 +16,14 @@ The forgetful functor `U : Pointed ⥤ Type` is the discrete opfibration classif
 of `Type`, so the pullback of a functor `f : D ⥤ Type` along `U` is the category of elements of
 `f`. The partial exponential `P c` of a category `c` has as objects the types `X` together with
 a family `X → c`.
+
+## References
+
+* [Paper, §2.2, Prop. `prop:CAT`] (the `Lexp`-category of categories): the projection
+  `U : Pointed ⥤ Type` (`PtdSet → Set` in the paper) is exponentiable in `CAT`; the pullback along
+  `U` of `F : D ⥤ Type` is the category of elements `∫F`, and the right adjoint sends a category `c`
+  to its category of families `Fam(c)` (`PointedForget.expData`, `PointedForget.expUniversal`).
+  The paper cites the family fibration from Jacobs' *Categorical Logic and Type Theory*.
 -/
 
 open CategoryTheory Limits
@@ -141,7 +149,9 @@ lemma elLift_uniq (m : S ⥤ F.Elements) (hA : m ⋙ elToPt F = A)
 
 end Elements
 
-/-- The forgetful functor from pointed types to types, as a morphism of `Cat`. -/
+/-- The forgetful functor from pointed types to types, as a morphism of `Cat`.
+
+[Paper, §2.2, Prop. `prop:CAT`]: the projection `PtdSet → Set`. -/
 def U : Cat.of Pointed.{w} ⟶ Cat.of (Type w) := (forget Pointed.{w}).toCatHom
 
 /-- The strict pullback of `U` along `f` in `Cat` is the category of elements of `f`. -/
@@ -260,7 +270,9 @@ section Final
 
 variable (c : Cat.{w, w + 1})
 
-/-- The partial exponential of `c` along `U` consists of families of objects of `c`. -/
+/-- The partial exponential of `c` along `U` consists of families of objects of `c`.
+
+[Paper, §2.2, Prop. `prop:CAT`]: the right adjoint sends `c` to the family fibration `Fam(c) → Set`. -/
 noncomputable def expData : Data U c where
   P := Cat.of (FormalCoproduct.{w} c)
   pi := (idx c).toCatHom
@@ -286,7 +298,9 @@ lemma fbf_eq {d : Cat.{w, w + 1}} (k : d ⟶ (expData c).P) (h : d ⟶ Cat.of (T
 lemma slice_eq {d : Cat.{w, w + 1}} (h : d ⥤ Type w) (G : h.Elements ⥤ c) :
     morF h G ⋙ idx c = h := rfl
 
-/-- `expData c` is universal, making `U` an exponentiable arrow in `Cat`. -/
+/-- `expData c` is universal, making `U` an exponentiable arrow in `Cat`.
+
+[Paper, §2.2, Prop. `prop:CAT`]. -/
 @[reducible]
 noncomputable def expUniversal : Universal (expData c) :=
   universal_of_chosen (expData c) (fun f => elChosen f)

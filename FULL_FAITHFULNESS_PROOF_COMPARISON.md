@@ -1,7 +1,7 @@
 # How the Lean proof of full faithfulness differs from the appendix
 
 This note compares the Lean proof that the two-sortification functor
-\(T : \FinGat → \FinGat/P X\) is fully faithful (`ExpArrCat.twoSortificationFullyFaithful` in
+\(T : \FinGat → \FinGat/P X\) is fully faithful (`Lexp.twoSortificationFullyFaithful` in
 `CartexpAristotle/TwoSortFFMain.lean`) with the appendix section "Two-sortification is Fully
 Faithful" of `s-appendices_csl.tex`.
 
@@ -15,7 +15,7 @@ is the chosen arrow, and \(\mathrm{Tm}(B) = \{t : Ω → Y \mid p ∘ t = B\}\).
 | Reduction to \(X\) and \(Y\) | Prop. *faithful-at-XGAT-YGAT*: full \(\Lexp\)-subcategory \(S\) + bi-initiality | Same idea, packaged as a general induction principle `IsBiInitial.induction` (`BiInitialInduction.lean`, `TwoSortificationFullyFaithful.lean`) |
 | Base cases as families | Cor. *faithful-via-terms*: one family morphism \(\mathrm{Tm}_Ω → \mathrm{Tm}^{\TW}_Ω\) must be mono / iso | Not used. Four separate statements: faithful/full at \(X\), faithful/full at \(Y\); fullness at \(Y\) uses fullness at \(X\) |
 | Which functor of models | \(\TWb\) (cartesian comma of \(\FamFunctor{Γ}\)), linked to \(\model{\TW-}\) by Uemura's theorem | \(G = Φ\mathcal M ∘ T\), i.e. \(\model{\TW -}\) itself; Uemura's theorem is not formalised and not needed |
-| Model \(\M{Ω}\) | Nat. trans. from the constant functor \(\hom(Ω,Γ) ↦ \mathrm{Tm}_Ω\) into \(\TWb\), then Yoneda | Nat. trans. `gammaT` **out of a collage** into \(G\); \(\M{Ω}\) = `NM` is the image of `inl (𝟙 a)` |
+| Model \(\M{Ω}\) | Nat. trans. from the constant functor \(\hom(Ω,Γ) ↦ \mathrm{Tm}_Ω\) into \(\TWb\), then Yoneda | Nat. trans. `gammaT` **out of a collage** into \(G\); \(\M{Ω}\) = `MOmega` is the image of `inl (𝟙 a)` |
 | Faithfulness | Read \(f\) off \(\TWb f(\M{Ω})\) | Same (`twoSort_faithful_cod`, `twoSort_faithful_dom`) |
 | Initial object \(\Z{Ω}\) | Prop. *initial-object-two-sortification* (full description of \(\bang\Z{Ω}\) as \(\mathrm{TmEl}_Ω\)), proved through Prop. *initial-value-fam* and Lemma *nat-universal-pullback-P* | Only the initial model `Zm a` of the underlying theory of \(TΩ\), and only *one* fact about it: the index that \(h\) picks in its family determines \(h\) (`Rd_zero_injective`, `Qd_zero_injective`) |
 | Section / fullness | \(\bang i\) is a section, proved by uniqueness of two nat. trans. into the colax slice \(\colaxSlice\) | A model morphism \(j : \M{Ω} → \Z{Ω}\) whose family part is "interpret the sorts and terms of \(Ω\)"; \(i ≫ j = \mathrm{id}\) by initiality of \(\Z{Ω}\) |
@@ -32,7 +32,7 @@ inclusion is isomorphic to the identity.
 
 **Lean.** The same argument, split in two:
 
-* `ExpArrCat.IsBiInitial.induction` (`BiInitialInduction.lean`) is a general induction
+* `Lexp.IsBiInitial.induction` (`BiInitialInduction.lean`) is a general induction
   principle for any bi-initial `A`: a property that is invariant under isomorphism, holds for the
   terminal object, is closed under pullbacks and under the chosen exponentials along `p`, and holds
   for `Y` and `X`, holds for every object. Its proof is exactly the appendix's "full
@@ -82,11 +82,11 @@ families is an iso iff it is an iso on indices and on each fibre".
 \(\model{TΓ → P X}\). Uemura's theorem, \(\TWb\) and the colax slice are not formalised.
 
 The "exact description of the images of \(X\) and \(Y\)" that motivated \(\TWb\) comes in Lean
-from the fact that `GT` is a morphism of `ExpArrCat`. Its isomorphism data `GT.iso` identify
+from the fact that `GT` is a morphism of `Lexp`. Its isomorphism data `GT.iso` identify
 `GT X` with families with a chosen index, and `GT Y` with the pullback of
 \(U : \mathbf{Pointed} → \mathbf{Set}\) along evaluation. These are `isoX`, `isoY`, `gX`, `gY` and
 `gIsPullback` in `TwoSortFFSetup.lean`. All of `TwoSortFFSetup`, `TwoSortFFCollage`,
-`TwoSortFFSquare` and `TwoSortFFGamma` work for an arbitrary `G : A ⟶ Φ CatExp` out of a
+`TwoSortFFSquare` and `TwoSortFFGamma` work for an arbitrary `G : A ⟶ Φ CatLexp` out of a
 bi-initial `A`. The two-sortification functor appears only in `TwoSortFFReadout` and
 `TwoSortFFMain`.
 
@@ -115,14 +115,14 @@ preserves pullbacks (`preservesPullbacks_D`) and that its square at `p` is a pul
 (`IsBiInitial.existsUnique_natTrans_iso`) then gives a unique `gammaT : D G K ⟶ G`
 (`TwoSortFFGamma.lean`), and
 
-* `NM = gammaT_a (inl (𝟙 a))` is \(\M{Ω}\). `famF_NM`, `isoX_NM` and `gY_NM` are exactly the
+* `MOmega = gammaT_a (inl (𝟙 a))` is \(\M{Ω}\). `famF_MOmega`, `isoX_MOmega` and `gY_MOmega` are exactly the
   three bullet points of Prop. *model-faithful*.
 * By uniqueness, `gammaT` is the identity on the `inr` part (`gamma_restrict₂`,
   `gammaT_obj_inr`).
 
-**Faithfulness** is then the same argument as in the appendix. By `isoX_NM`, the image of
-`NM` under `T B` is `TmFam a` with the index `B`, so `T B₁ = T B₂` forces `B₁ = B₂`. The case of
-\(Y\) uses the point instead (`gY_NM`). One small difference: the appendix first proves that
+**Faithfulness** is then the same argument as in the appendix. By `isoX_MOmega`, the image of
+`MOmega` under `T B` is `TmFam a` with the index `B`, so `T B₁ = T B₂` forces `B₁ = B₂`. The case of
+\(Y\) uses the point instead (`gY_MOmega`). One small difference: the appendix first proves that
 \(\model{\TW -}\) is faithful and deduces that \(\TW\) is faithful. Lean reads `B` off directly
 from `T B`, because the model only depends on `T B`.
 
@@ -214,7 +214,7 @@ square at \(p\), and many dependent-type `HEq` transports in `TwoSortFFMain.lean
 ## 7. Size assumption
 
 Both the family `TmFam a` and the initial model need the term sets \(\mathrm{Tm}(B)\) as types in
-`Type w`, but `FinGat : ExpArrCat.{w+1, w+2}` has hom-sets in `Type (w+1)`. The Lean statements
+`Type w`, but `FinGat : Lexp.{w+1, w+2}` has hom-sets in `Type (w+1)`. The Lean statements
 therefore assume `[LocallySmall.{w} FinGat.carrier]` and use `Shrink` (`shX`, `unX`, `TmS` in
 `TwoSortFFCollage.lean`). This is the same hypothesis as for initial models. The appendix does not
 discuss sizes.

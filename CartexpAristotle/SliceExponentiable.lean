@@ -12,6 +12,16 @@ import CartexpAristotle.PartialExponentiability
 
 If `u : Y ⟶ X` is exponentiable in `C`, `u' : Y' ⟶ X'` is a pullback of `u` along `e : X' ⟶ X`,
 and `w : X' ⟶ Z`, then `u'` is exponentiable as an arrow `Over.mk (u' ≫ w) ⟶ Over.mk w` in `Over Z`.
+
+## References
+
+* [Paper, §3.1, Prop. `prop:p2-construction`] (Eq. `eq:p2-diagram`): `sZ = P X`,
+  `sE : X̲ → X` the counit `ε_X`, `sW : X̲ → P X`, and `su' : Y̲ → X̲` the morphism `p̲`.
+* [Paper, §3.1, Prop. `prop:p2-exponentiable`] and its proof sketch: `p̲` is exponentiable in
+  `C / P X` (`SliceExp.sIsExpArr`); more generally a pullback of an exponentiable morphism is
+  exponentiable in any slice.
+* [Paper, App. A.1, Prop. `prop:p2-description-polynomial`]: explicit description of the
+  pushforward along `p̲` (`SliceExp.sOverData`).
 -/
 
 open CategoryTheory Limits
@@ -294,10 +304,14 @@ variable [HasPullbacks C] {X Y : C} (u : Y ⟶ X) [IsExpArr u]
 /-- The chosen universal `Data` for `X`. -/
 noncomputable abbrev sX : Data u X := IsExpArr.isExpArrowData X
 
-/-- The base `P X` of the slice. -/
+/-- The base `P X` of the slice.
+
+[Paper, §3.1, Prop. `prop:p2-construction`]: `P X`. -/
 noncomputable abbrev sZ : C := (sX u).P
 
-/-- The counit `Y ×_X P X ⟶ X`. -/
+/-- The counit `Y ×_X P X ⟶ X`.
+
+[Paper, §3.1, Prop. `prop:p2-construction`]: the counit `ε_X : X̲ ⟶ X`. -/
 noncomputable abbrev sE : (sX u).Pbk.pullback ⟶ X := (sX u).epsilon
 
 /-- The projection `Y ×_X P X ⟶ P X`. -/
@@ -306,13 +320,17 @@ noncomputable abbrev sW : (sX u).Pbk.pullback ⟶ sZ u := (sX u).Pbk.p₂
 /-- The domain of the pulled back arrow. -/
 noncomputable abbrev sY' : C := pullback u (sE u)
 
-/-- The pullback of `u` along the counit. -/
+/-- The pullback of `u` along the counit.
+
+[Paper, §3.1, Prop. `prop:p2-construction`]: the morphism `p̲ : Y̲ ⟶ X̲`. -/
 noncomputable abbrev su' : sY' u ⟶ (sX u).Pbk.pullback := pullback.snd u (sE u)
 
 lemma shpb : IsPullback (pullback.fst u (sE u)) (su' u) u (sE u) :=
   IsPullback.of_hasPullback u (sE u)
 
-/-- The pulled back arrow, as an arrow of `Over (P X)`. -/
+/-- The pulled back arrow, as an arrow of `Over (P X)`.
+
+[Paper, §3.1, Prop. `prop:p2-exponentiable`]: `p̲` as a morphism of `C / P X`. -/
 noncomputable def sArr : Over.mk (su' u ≫ sW u) ⟶ Over.mk (sW u) :=
   Over.homMk (su' u)
 
@@ -375,7 +393,9 @@ noncomputable def sSetup : Setup (shpb u) (sdc u c) (sdZ u) c.hom (sW u) (sD u c
   hW := IsPullback.of_hasPullback _ _
   hε := rfl
 
-/-- The universal `Data` in `Over (P X)` for the pulled back arrow. -/
+/-- The universal `Data` in `Over (P X)` for the pulled back arrow.
+
+[Paper, App. A.1, Prop. `prop:p2-description-polynomial`]. -/
 noncomputable def sOverData : Data (sArr u) c :=
   overData (sArr u) (sD u c) (sSetup u c).eps_over
 
@@ -386,6 +406,7 @@ noncomputable def sOverUniv : Universal (sOverData u c) :=
       (shPqε u c) (sτ u) (shτ u) (shτε u) _ (sω u c) (shω u c)
       (IsPullback.of_hasPullback _ _) rfl)
 
+/-- [Paper, §3.1, Prop. `prop:p2-exponentiable`]: `p̲` is exponentiable in `C / P X`. -/
 noncomputable instance sIsExpArr : IsExpArr (sArr u) where
   isExpArrowData := sOverData u
   isExpArrow := sOverUniv u

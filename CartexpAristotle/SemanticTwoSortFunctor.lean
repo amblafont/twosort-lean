@@ -1,39 +1,53 @@
-import CartexpAristotle.FamOverFrobenius
+import CartexpAristotle.SemanticTwoSortFrobenius
 import CartexpAristotle.CatPullbacks
-import CartexpAristotle.ExpArrEndofunctor
+import CartexpAristotle.LexpEndofunctor
 import Mathlib.CategoryTheory.Category.Cat.Terminal
 
 /-!
-# `FamSlice.toOver` is a morphism of `ExpArrCat`
+# `ColaxSliceCart.toOver` is a morphism of `Lexp`
 
-* `CatExp`: the category `Cat.{w, w+1}` with the exponentiable arrow `U : Pointed ⥤ Type w`.
-* `FamSliceExp`: `FamSlice` with the exponentiable arrow `UFam`.
-* The image `Φ CatExp` of `CatExp` under the endofunctor of `ExpArrCat` is the slice of `Cat` over
+* `CatLexp`: the category `Cat.{w, w+1}` with the exponentiable arrow `U : Pointed ⥤ Type w`.
+* `ColaxSliceCartLexp`: `ColaxSliceCart` with the exponentiable arrow `UFam`.
+* The image `Φ CatLexp` of `CatLexp` under the endofunctor of `Lexp` is the slice of `Cat` over
   the category of formal coproducts of types, which is isomorphic to `Fam` (`famFC`). Hence the
-  slice `Over (Cat.of Fam)` inherits an `ExpArrCat` structure (`FamOverExp`) by transport along
+  slice `Over (Cat.of Fam)` inherits an `Lexp` structure (`CatOverFamLexp`) by transport along
   the equivalence `Over (Cat.of Fam) ≌ Over (Cat.of (FormalCoproduct (Type w)))`.
-* `toOverHom : FamSliceExp ⟶ FamOverExp`: the functor `FamSlice.toOver` is a morphism of
-  `ExpArrCat`. It preserves pullbacks and the terminal object (being a right adjoint), it preserves
+* `toOverHom : ColaxSliceCartLexp ⟶ CatOverFamLexp`: the functor `ColaxSliceCart.toOver` is a morphism of
+  `Lexp`. It preserves pullbacks and the terminal object (being a right adjoint), it preserves
   the exponentiable arrow (Frobenius condition), and it sends `UFam` to an arrow isomorphic to the
-  chosen arrow of `FamOverExp`.
+  chosen arrow of `CatOverFamLexp`.
+
+## References
+
+* [Paper, §2.2, Prop. `prop:CAT`]: `CatLexp` is the `Lexp`-category `CAT`.
+* [Paper, §4.1, Thm. `thm:colax-exponentiable`]: `ColaxSliceCartLexp` is the `Lexp`-category
+  `CAT //_c Fam`.
+* [Paper, §4.2]: `CatOverFamLexp` is `CAT/Fam` "seen as a `Lexp`-category by
+  Prop. `prop:p2-exponentiable`" (via `Fam ≅ P_U(1)`, `famFC`).
+* [Paper, §4.2, Prop. `prop:semantic-twosort-functor`]: `toOverHom` is the `Lexp`-functor
+  `CAT //_c Fam → CAT/Fam`, `F ↦ (F/_c Fam → Fam)`.
 -/
 
 universe w
 
-open CategoryTheory Limits FamSlice FamPointedForget PointedForget FamOverFrobenius
+open CategoryTheory Limits ColaxSliceCart ColaxSliceCartExponentiable PointedForget SemanticTwoSortFrobenius
 
-namespace FamOverExpArr
+namespace SemanticTwoSortFunctor
 
-/-! ### The objects of `ExpArrCat` -/
+/-! ### The objects of `Lexp` -/
 
-/-- `Cat.{w, w+1}` with the exponentiable arrow `U : Pointed ⥤ Type w`. -/
-noncomputable def CatExp : ExpArrCat.{w + 1, w + 2} where
+/-- `Cat.{w, w+1}` with the exponentiable arrow `U : Pointed ⥤ Type w`.
+
+[Paper, §2.2, Prop. `prop:CAT`]: the `Lexp`-category `CAT`. -/
+noncomputable def CatLexp : Lexp.{w + 1, w + 2} where
   carrier := Cat.{w, w + 1}
   arr := U.{w}
 
-/-- `FamSlice` with the exponentiable arrow `UFam`. -/
-noncomputable def FamSliceExp : ExpArrCat.{w + 1, w + 2} where
-  carrier := FamSlice.{w, w, w + 1}
+/-- `ColaxSliceCart` with the exponentiable arrow `UFam`.
+
+[Paper, §4.1, Thm. `thm:colax-exponentiable`]: the `Lexp`-category `CAT //_c Fam`. -/
+noncomputable def ColaxSliceCartLexp : Lexp.{w + 1, w + 2} where
+  carrier := ColaxSliceCart.{w, w, w + 1}
   arr := UFam.{w}
 
 /-! ### `Fam` is isomorphic to the category of formal coproducts of types -/
@@ -55,10 +69,12 @@ def famFC : Cat.of Fam.{w} ≅ Cat.of (FormalCoproduct.{w} (Type w)) where
   hom_inv_id := rfl
   inv_hom_id := rfl
 
-/-- The slice `Over (Cat.of Fam)` with the `ExpArrCat` structure inherited from `Φ CatExp`
-along the isomorphism `famFC`. -/
-noncomputable def FamOverExp : ExpArrCat.{w + 1, w + 2} :=
-  ExpArrCat.ofEquivalence (ExpArrCat.Φobj.{w + 1, w + 2} CatExp.{w}) (Over (Cat.of Fam.{w}))
+/-- The slice `Over (Cat.of Fam)` with the `Lexp` structure inherited from `Φ CatLexp`
+along the isomorphism `famFC`.
+
+[Paper, §4.2]: `CAT/Fam` as a `Lexp`-category by [Paper, §3.1, Prop. `prop:p2-exponentiable`]. -/
+noncomputable def CatOverFamLexp : Lexp.{w + 1, w + 2} :=
+  Lexp.ofEquivalence (Lexp.Φobj.{w + 1, w + 2} CatLexp.{w}) (Over (Cat.of Fam.{w}))
     (Over.mapIso famFC)
 
 /-! ### The cartesian comma category of `SetObj` is the category of pointed families -/
@@ -169,13 +185,15 @@ lemma isoL_comm : isoL.{w}.hom ≫ (Over.map famFC.{w}.inv).map (SliceExp.sArr U
   simp only [isoL, Iso.trans_hom, Iso.symm_hom, asIso_inv, Category.assoc, IsIso.hom_inv_id_assoc]
   exact Over.OverMorphism.ext isoφ_snd
 
-/-! ### The morphism of `ExpArrCat` -/
+/-! ### The morphism of `Lexp` -/
 
-/-- The functor `FamSlice.toOver` is a morphism of `ExpArrCat` from `FamSlice` (with the
-exponentiable arrow `UFam`) to `Over (Cat.of Fam)` (with the structure inherited from `Φ CatExp`):
+/-- The functor `ColaxSliceCart.toOver` is a morphism of `Lexp` from `ColaxSliceCart` (with the
+exponentiable arrow `UFam`) to `Over (Cat.of Fam)` (with the structure inherited from `Φ CatLexp`):
 it preserves pullbacks, the terminal object and the exponentiable arrow, and sends `UFam` to an
-arrow isomorphic to the chosen arrow. -/
-noncomputable def toOverHom : FamSliceExp.{w} ⟶ FamOverExp.{w} where
+arrow isomorphic to the chosen arrow.
+
+[Paper, §4.2, Prop. `prop:semantic-twosort-functor`]. -/
+noncomputable def toOverHom : ColaxSliceCartLexp.{w} ⟶ CatOverFamLexp.{w} where
   functor := toOver.{w}
   preservesPullbacks := (inferInstance : PreservesLimitsOfShape WalkingCospan toOver.{w})
   preservesTerminal := (inferInstance : PreservesLimitsOfShape (Discrete PEmpty.{1}) toOver.{w})
@@ -183,6 +201,6 @@ noncomputable def toOverHom : FamSliceExp.{w} ⟶ FamOverExp.{w} where
   iso := Arrow.isoMk isoL isoR isoL_comm
 
 lemma toOverHom_functor :
-    (toOverHom.{w} : ExpArrCat.Hom FamSliceExp FamOverExp).functor = toOver.{w} := rfl
+    (toOverHom.{w} : Lexp.Hom ColaxSliceCartLexp CatOverFamLexp).functor = toOver.{w} := rfl
 
-end FamOverExpArr
+end SemanticTwoSortFunctor

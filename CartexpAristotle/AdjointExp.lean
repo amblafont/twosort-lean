@@ -1,4 +1,4 @@
-import CartexpAristotle.ExpArrCat
+import CartexpAristotle.Lexp
 import CartexpAristotle.SliceExponentiable
 
 /-!
@@ -10,7 +10,16 @@ import CartexpAristotle.SliceExponentiable
   projections transposed) is a pullback of `u` along the transpose of `f`.
 * An equivalence satisfies this condition, so exponentiable arrows can be transported along
   equivalences of categories (`IsExpArr.ofEquivalence`), and so can the whole structure of an
-  object of `ExpArrCat` (`ExpArrCat.ofEquivalence`).
+  object of `Lexp` (`Lexp.ofEquivalence`).
+
+## References
+
+* [Paper, App. A.4, proof of Prop. `prop:semantic-twosort-functor`]: a right adjoint whose left
+  adjoint preserves pullbacks and satisfies the counit-pullback (Frobenius) condition preserves
+  pushforwards along the exponentiable morphism. `functorPreserves_of_adjunction` is the Lean
+  version of this abstract argument.
+* `Lexp.ofEquivalence` is auxiliary (transport of a `Lexp`-structure along an equivalence); it is
+  used to identify `CAT/Fam` with the `Lexp`-category `Φ CatLexp` of [Paper, Prop. `prop:p2-exponentiable`].
 -/
 
 open CategoryTheory Limits
@@ -147,7 +156,9 @@ noncomputable def universal_functor_on {c : C} (d : Data u c) [Universal d] :
     exact congrArg _ H
 
 /-- A right adjoint satisfying the Frobenius condition for `u` preserves exponentiability of
-`u`. -/
+`u`.
+
+[Paper, App. A.4, proof of Prop. `prop:semantic-twosort-functor`] (abstract adjunction argument). -/
 @[reducible]
 noncomputable def functorPreserves_of_adjunction : FunctorPreserves u R where
   functor_preserves d _ := universal_functor_on hF d
@@ -192,17 +203,17 @@ noncomputable def IsExpArr.ofEquivalence {X Y : D} (u : Y ⟶ X) [IsExpArr u] :
 
 end Equivalence
 
-namespace ExpArrCat
+namespace Lexp
 
 universe v u
 
-/-- Transport of the structure of an object of `ExpArrCat` along an equivalence. -/
-noncomputable def ofEquivalence (A : ExpArrCat.{v, u}) (C : Type u) [Category.{v} C]
-    (E : C ≌ A) : ExpArrCat.{v, u} :=
+/-- Transport of the structure of an object of `Lexp` along an equivalence. -/
+noncomputable def ofEquivalence (A : Lexp.{v, u}) (C : Type u) [Category.{v} C]
+    (E : C ≌ A) : Lexp.{v, u} :=
   haveI : HasPullbacks C := Adjunction.hasLimitsOfShape_of_equivalence E.functor
   haveI : HasTerminal C := Adjunction.hasLimitsOfShape_of_equivalence E.functor
   { carrier := C
     arr := E.inverse.map A.arr
     isExpArr := IsExpArr.ofEquivalence E A.arr }
 
-end ExpArrCat
+end Lexp

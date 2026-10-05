@@ -15,6 +15,16 @@ of `D` and of `E`, with morphisms
 Given functors `P Q : C ⥤ Cat` and a natural transformation `β : P ⟶ Q`, the collages of the
 components of `β` assemble into a functor `Collage.functor β : C ⥤ Cat`, which preserves any
 pullback square preserved by both `P` and `Q`.
+
+## References
+
+* Auxiliary, not in the paper. Collages replace the `Lexp`-functor `cod_- : CAT → CAT^→` of
+  [Paper, App. B, Prop. `prop:arrow-functor-lexp`] in the proof of
+  [Paper, App. B, Prop. `prop:initial-model-gat-morphism-existence`], and the colax slice in the
+  proof of [Paper, App. C, Prop. `prop:section-terms-two-sortification`]. See
+  `INITIALITY_PROOF_COMPARISON.md` and `FULL_FAITHFULNESS_PROOF_COMPARISON.md`.
+* `Collage.homDiscFunctor` is the functor `Γ ↦ hom(Ω, Γ)` (seen as a discrete category) used as the
+  source of the natural transformation of [Paper, App. B, Prop. `prop:initial-model-gat-existence`].
 -/
 
 @[expose] public section

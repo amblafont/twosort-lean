@@ -18,6 +18,13 @@ is a pullback in `Cat` if and only if
   `snd w = x₂`, and
 * for all objects `w`, `w'` and morphisms `h₁ : fst w ⟶ fst w'`, `h₂ : snd w ⟶ snd w'` with
   `f h₁ ≍ g h₂` there is a unique `k : w ⟶ w'` with `fst k = h₁` and `snd k = h₂`.
+
+## References
+
+* Auxiliary. [Paper, App. B] (initial models) and [Paper, App. C] (full faithfulness) need
+  to check that certain naturality squares in `CAT` are pullbacks, in order to apply
+  [Paper, Thm. `thm:universal-property-natural-transformation`]; this is the concrete criterion
+  used for that purpose. The paper uses it implicitly.
 -/
 
 @[expose] public section

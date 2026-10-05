@@ -3,16 +3,22 @@ Copyright (c) 2026 Lean Contributor. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Lean Contributor
 -/
-import CartexpAristotle.ExpArrCat
+import CartexpAristotle.Lexp
 
 /-!
-# Strict morphisms of `ExpArrCat`
+# Strict morphisms of `Lexp`
 
-A morphism `F : A ⟶ B` of `ExpArrCat` is *strict* when its isomorphism `F.iso` between the
+A morphism `F : A ⟶ B` of `Lexp` is *strict* when its isomorphism `F.iso` between the
 image of the chosen arrow of `A` and the chosen arrow of `B` is an identity, i.e. an `eqToIso`.
 
 We show that, when the domain and codomain of the chosen arrow of `A` are distinct, every
 morphism `A ⟶ B` is isomorphic (by an invertible 2-cell) to a strict one.
+
+## References
+
+* [Paper, §2.2, Prop. `prop:strictification`]: strict `Lexp`-functors (`Lexp.Hom.IsStrict`), and
+  every `Lexp`-functor out of a `Lexp`-category with `X ≠ Y` is isomorphic to a strict one
+  (`Lexp.strictify`, `Lexp.exists_strict_iso`), by the isofibration argument of the paper.
 -/
 
 open CategoryTheory Limits
@@ -77,15 +83,17 @@ noncomputable def functorPreserves_of_natIso (F G : C ⥤ D) (e : F ≅ G)
 
 end Transport
 
-namespace ExpArrCat
+namespace Lexp
 
-/-- A morphism of `ExpArrCat` is strict when its isomorphism of arrows is an identity. -/
-def Hom.IsStrict {A B : ExpArrCat.{v, u}} (F : A ⟶ B) : Prop :=
+/-- A morphism of `Lexp` is strict when its isomorphism of arrows is an identity.
+
+[Paper, §2.2, Prop. `prop:strictification`]: strict `Lexp`-functor. -/
+def Hom.IsStrict {A B : Lexp.{v, u}} (F : A ⟶ B) : Prop :=
   ∃ h : Arrow.mk (F.functor.map A.arr) = Arrow.mk B.arr, F.iso = eqToIso h
 
 section Strictify
 
-variable {A B : ExpArrCat.{v, u}} (F : A ⟶ B)
+variable {A B : Lexp.{v, u}} (F : A ⟶ B)
 
 open Classical in
 /-- The new object assignment, with an isomorphism from the old one. -/
@@ -153,7 +161,9 @@ private lemma right_aux (s : Σ Y : B, F.functor.obj A.dom ≅ Y)
   rw [key]
   simp [Comma.rightIso]
 
-/-- The strict morphism isomorphic to `F`. -/
+/-- The strict morphism isomorphic to `F`.
+
+[Paper, §2.2, Prop. `prop:strictification`]. -/
 noncomputable def strictify (h : A.dom ≠ A.cod) : A ⟶ B :=
   letI : PreservesLimitsOfShape WalkingCospan (strictFunctor F) :=
     preservesLimitsOfShape_of_natIso (strictFunctorIso F)
@@ -176,9 +186,11 @@ noncomputable def strictifyIso (h : A.dom ≠ A.cod) : F ≅ strictify F h :=
 end Strictify
 
 /-- If the domain and codomain of the chosen arrow of `A` are distinct, every morphism
-`F : A ⟶ B` of `ExpArrCat` is isomorphic, by an invertible 2-cell, to a strict morphism. -/
-theorem exists_strict_iso {A B : ExpArrCat.{v, u}} (F : A ⟶ B) (h : A.dom ≠ A.cod) :
+`F : A ⟶ B` of `Lexp` is isomorphic, by an invertible 2-cell, to a strict morphism.
+
+[Paper, §2.2, Prop. `prop:strictification`]. -/
+theorem exists_strict_iso {A B : Lexp.{v, u}} (F : A ⟶ B) (h : A.dom ≠ A.cod) :
     ∃ G : A ⟶ B, G.IsStrict ∧ Nonempty (F ≅ G) :=
   ⟨strictify F h, strictify_isStrict F h, ⟨strictifyIso F h⟩⟩
 
-end ExpArrCat
+end Lexp

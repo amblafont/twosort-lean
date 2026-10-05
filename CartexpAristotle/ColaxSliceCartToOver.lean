@@ -1,24 +1,32 @@
 module
 
-public import CartexpAristotle.FamSlice
+public import CartexpAristotle.ColaxSliceCart
 public import Mathlib.CategoryTheory.Comma.Over.Basic
 
 /-!
-# From `FamSlice` to the slice of categories over `Fam`
+# From `ColaxSliceCart` to the slice of categories over `Fam`
 
-To an object `F : C ⥤ Fam` of `FamSlice` we associate its *cartesian comma category*
-`FamSlice.CartComma F`: an object is a cartesian morphism of families `f : F c ⟶ T` (for some
+To an object `F : C ⥤ Fam` of `ColaxSliceCart` we associate its *cartesian comma category*
+`ColaxSliceCart.CartComma F`: an object is a cartesian morphism of families `f : F c ⟶ T` (for some
 `c : C` and `T : Fam`), and a morphism `(c, T, f) ⟶ (c', T', f')` is a pair `u : c ⟶ c'`,
 `v : T ⟶ T'` with `F u ≫ f' = f ≫ v` (the full subcategory of the comma category `F ↓ 𝟭 Fam`
 on the cartesian morphisms). It comes with the projection `(c, T, f) ↦ T` to `Fam`, which makes
 it an object of the slice category `Over (Cat.of Fam)`.
 
-A morphism `(H, n) : (C, F) ⟶ (D, G)` of `FamSlice` (so `n : H ⋙ G ⟶ F` is pointwise cartesian)
+A morphism `(H, n) : (C, F) ⟶ (D, G)` of `ColaxSliceCart` (so `n : H ⋙ G ⟶ F` is pointwise cartesian)
 induces the functor `(c, T, f) ↦ (H c, T, n_c ≫ f)`, which commutes strictly with the projections
-to `Fam`. This gives the functor `FamSlice.toOver : FamSlice ⥤ Over (Cat.of Fam)`.
+to `Fam`. This gives the functor `ColaxSliceCart.toOver : ColaxSliceCart ⥤ Over (Cat.of Fam)`.
 
 To make the cartesian comma category live in the same universe as `Fam` itself, we take the
-underlying categories of `FamSlice` in `Cat.{w, w+1}`, the universe of `Fam.{w}`.
+underlying categories of `ColaxSliceCart` in `Cat.{w, w+1}`, the universe of `Fam.{w}`.
+
+## References
+
+* [Paper, §4.2, Thm. `thm:characterisation-models-two-sortification`]: `CartComma F` is the
+  full subcategory `F/_c Fam` of the comma category `F/Fam` spanned by the cartesian morphisms.
+* [Paper, §4.2, Prop. `prop:semantic-twosort-functor`]: the mapping `F ↦ (F/_c Fam → Fam)` extends to
+  a functor `CAT //_c Fam → CAT/Fam` (`ColaxSliceCart.toOver`). That it is a `Lexp`-functor is
+  proved in `CartexpAristotle.SemanticTwoSortFunctor`.
 -/
 
 @[expose] public section
@@ -27,12 +35,14 @@ universe w v u
 
 open CategoryTheory
 
-namespace FamSlice
+namespace ColaxSliceCart
 
-variable (X : FamSlice.{w, v, u})
+variable (X : ColaxSliceCart.{w, v, u})
 
 /-- An object of the cartesian comma category of `X = (C, F)`: an object `c : C`, a family `T`
-and a cartesian morphism of families `F c ⟶ T`. -/
+and a cartesian morphism of families `F c ⟶ T`.
+
+[Paper, §4.2, Thm. `thm:characterisation-models-two-sortification`]: `F/_c Fam`. -/
 structure CartComma where
   /-- The object of the underlying category. -/
   obj : X.cat
@@ -79,9 +89,9 @@ def proj : CartComma X ⥤ Fam.{w} where
   obj a := a.tgt
   map f := (f : Hom _ _).right
 
-variable {Y : FamSlice.{w, v, u}}
+variable {Y : ColaxSliceCart.{w, v, u}}
 
-/-- The functor between cartesian comma categories induced by a morphism `(H, n)` of `FamSlice`:
+/-- The functor between cartesian comma categories induced by a morphism `(H, n)` of `ColaxSliceCart`:
 `(c, T, f) ↦ (H c, T, n_c ≫ f)`. -/
 def map (g : X ⟶ Y) : CartComma X ⥤ CartComma Y where
   obj a := ⟨g.functor.obj a.obj, a.tgt, g.nat.app a.obj ≫ a.hom,
@@ -94,26 +104,28 @@ def map (g : X ⟶ Y) : CartComma X ⥤ CartComma Y where
 
 lemma map_proj (g : X ⟶ Y) : map g ⋙ proj Y = proj X := rfl
 
-lemma map_id (X : FamSlice.{w, v, u}) : map (𝟙 X) = 𝟭 (CartComma X) := rfl
+lemma map_id (X : ColaxSliceCart.{w, v, u}) : map (𝟙 X) = 𝟭 (CartComma X) := rfl
 
-lemma map_comp {Z : FamSlice.{w, v, u}} (f : X ⟶ Y) (g : Y ⟶ Z) :
+lemma map_comp {Z : ColaxSliceCart.{w, v, u}} (f : X ⟶ Y) (g : Y ⟶ Z) :
     map (f ≫ g) = map f ⋙ map g := rfl
 
 end CartComma
 
 /-- The cartesian comma category of `X = (C, F)`, as an object of the slice of categories
 over `Fam`, via the projection `(c, T, f) ↦ T`. -/
-def toOverObj (X : FamSlice.{w, w, w + 1}) : Over (Cat.of Fam.{w}) :=
+def toOverObj (X : ColaxSliceCart.{w, w, w + 1}) : Over (Cat.of Fam.{w}) :=
   Over.mk ((CartComma.proj X).toCatHom : Cat.of (CartComma X) ⟶ Cat.of Fam.{w})
 
-/-- The functor from `FamSlice` to the slice of categories over `Fam`, sending `F : C ⥤ Fam` to
+/-- The functor from `ColaxSliceCart` to the slice of categories over `Fam`, sending `F : C ⥤ Fam` to
 its cartesian comma category, whose objects are the cartesian morphisms of families `F c ⟶ T`,
 together with the projection `(c, T, f) ↦ T`. A morphism `(H, n)` is sent to the functor
-`(c, T, f) ↦ (H c, T, n_c ≫ f)`, which commutes strictly with the projections. -/
-def toOver : FamSlice.{w, w, w + 1} ⥤ Over (Cat.of Fam.{w}) where
+`(c, T, f) ↦ (H c, T, n_c ≫ f)`, which commutes strictly with the projections.
+
+[Paper, §4.2, Prop. `prop:semantic-twosort-functor`]: `F ↦ (F/_c Fam → Fam)`. -/
+def toOver : ColaxSliceCart.{w, w, w + 1} ⥤ Over (Cat.of Fam.{w}) where
   obj := toOverObj
   map g := Over.homMk (CartComma.map g).toCatHom rfl
   map_id _ := rfl
   map_comp _ _ := rfl
 
-end FamSlice
+end ColaxSliceCart

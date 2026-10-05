@@ -9,7 +9,7 @@ import CartexpAristotle.InitialModelUnique
 # Models of two-sortified theories: setup
 
 We follow the appendix section "Two-sortification is fully faithful". Let `A` (`FinGat`) be a
-bi-initial object of `ExpArrCat` with `w`-small hom-types, and let `C₀ = Φ CatExp` be the image of
+bi-initial object of `Lexp` with `w`-small hom-types, and let `C₀ = Φ CatLexp` be the image of
 `Cat` (with `U : Pointed ⥤ Type`) under the endofunctor `Φ`: its underlying category is the slice
 of `Cat` over `𝔽 = FormalCoproduct (Type w)` (families of types), its chosen codomain is the
 category of elements `El` of `idx : 𝔽 ⥤ Type` (families with a chosen index), and its chosen
@@ -23,22 +23,27 @@ isomorphism of Uemura's theorem), we set up:
 * `gY : G Y ⥤ Pointed`: the sort of a model of `Y` with its distinguished term;
 * `gIsPullback`: these form a pullback square over `G p` and `U`, giving a concrete criterion
   (`critG`).
+
+## References
+
+* [Paper, App. C] (Two-sortification is fully faithful), setup. `C₀ = Φ CatLexp` is `CAT/Fam`
+  ([Paper, §4.2]).
 -/
 
 open CategoryTheory Limits
 
 universe w
 
-namespace ExpArrCat
+namespace Lexp
 
 namespace TwoSortFF
 
-open FamOverExpArr PointedForget SliceExp
+open SemanticTwoSortFunctor PointedForget SliceExp
 
 noncomputable section
 
-/-- `Φ CatExp`: the slice of `Cat` over families of types, with the arrow `p'`. -/
-abbrev C₀ : ExpArrCat.{w + 1, w + 2} := Φobj.{w + 1, w + 2} CatExp.{w}
+/-- `Φ CatLexp`: the slice of `Cat` over families of types, with the arrow `p'`. -/
+abbrev C₀ : Lexp.{w + 1, w + 2} := Φobj.{w + 1, w + 2} CatLexp.{w}
 
 /-- Families of types, as formal coproducts of types. -/
 abbrev 𝔽 : Cat.{w, w + 1} := sZ U.{w}
@@ -51,7 +56,7 @@ abbrev PB : Cat.{w, w + 1} := sY' U.{w}
 
 section Setup
 
-variable {A : ExpArrCat.{w + 1, w + 2}} (G : A ⟶ C₀.{w})
+variable {A : Lexp.{w + 1, w + 2}} (G : A ⟶ C₀.{w})
 
 /-- The underlying category of `G Γ`. -/
 abbrev GL (Γ : A.carrier) : Cat.{w, w + 1} := (G.functor.obj Γ).left
@@ -137,4 +142,4 @@ end
 
 end TwoSortFF
 
-end ExpArrCat
+end Lexp

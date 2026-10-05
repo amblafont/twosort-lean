@@ -1,20 +1,28 @@
 module
 
-public import CartexpAristotle.FamSlice
+public import CartexpAristotle.ColaxSliceCart
 public import Mathlib.CategoryTheory.EqToHom
 public import Mathlib.CategoryTheory.Limits.Shapes.Pullback.HasPullback
 public import Mathlib.CategoryTheory.Limits.Shapes.Terminal
 
 /-!
-# Pullbacks and a terminal object in `FamSlice`
+# Pullbacks and a terminal object in `ColaxSliceCart`
 
-* The terminal object of `FamSlice` is the one-object category equipped with the functor
+* The terminal object of `ColaxSliceCart` is the one-object category equipped with the functor
   constant at the empty family.
 * The pullback of `(H, n) : (A, F) ⟶ (C, E)` and `(K, m) : (B, G) ⟶ (C, E)` has as underlying
   category the strict pullback `A ×_C B` (pairs `(a, b)` with `H a = K b`), and the functor to
   `Fam` sends `(a, b)` to the pushout of `F a ← E (H a) = E (K b) → G b` along the cartesian
   maps `n`, `m`: its base is the pushout of the base types, and its fibres are those of `F a`
   resp. `G b` (which agree on glued indices because `n` and `m` are cartesian).
+
+## References
+
+* [Paper, §4.1, Thm. `thm:colax-exponentiable`] (first sentence) and
+  [Paper, App. A.4, Props. `prop:colax-slice-limits` and `prop:cartesian-colax-lexp`]:
+  `CAT //_c Fam` has finite limits, computed as in the proof of `prop:cartesian-colax-lexp` (the
+  pullback of the underlying categories in `CAT`, with the pushout of the whiskered natural
+  transformations).
 -/
 
 @[expose] public section
@@ -127,9 +135,9 @@ lemma heq_apply_of_heq {α α' β : Sort _} (hα : α = α') {F : α → β} {G 
   obtain rfl := eq_of_heq ha
   rfl
 
-namespace FamSlice
+namespace ColaxSliceCart
 
-lemma Hom.ext_of_functor_eq {X Y : FamSlice.{w, v, u}} {f g : Hom X Y}
+lemma Hom.ext_of_functor_eq {X Y : ColaxSliceCart.{w, v, u}} {f g : Hom X Y}
     (hF : f.functor = g.functor)
     (h : ∀ c, HEq (f.nat.app c : Fam.Hom _ _).base (g.nat.app c : Fam.Hom _ _).base) : f = g := by
   rcases f with ⟨F, n, hn⟩
@@ -139,17 +147,17 @@ lemma Hom.ext_of_functor_eq {X Y : FamSlice.{w, v, u}} {f g : Hom X Y}
   congr 1
   exact NatTrans.ext (funext fun c => Fam.Hom.ext_of_isCartesian (hn c) (hm c) (eq_of_heq (h c)))
 
-lemma Hom.base_heq_of_eq {X Y : FamSlice.{w, v, u}} {f g : Hom X Y} (h : f = g) (c : X.cat) :
+lemma Hom.base_heq_of_eq {X Y : ColaxSliceCart.{w, v, u}} {f g : Hom X Y} (h : f = g) (c : X.cat) :
     HEq (f.nat.app c : Fam.Hom _ _).base (g.nat.app c : Fam.Hom _ _).base := by
   subst h; rfl
 
-lemma Hom.functor_eq_of_eq {X Y : FamSlice.{w, v, u}} {f g : Hom X Y} (h : f = g) :
+lemma Hom.functor_eq_of_eq {X Y : ColaxSliceCart.{w, v, u}} {f g : Hom X Y} (h : f = g) :
     f.functor = g.functor := by
   subst h; rfl
 
-end FamSlice
+end ColaxSliceCart
 
-namespace FamSlice
+namespace ColaxSliceCart
 
 /-! ### The terminal object -/
 
@@ -166,41 +174,43 @@ instance : Category.{v} Pt.{u} where
 /-- The empty family. -/
 def emptyFam : Fam.{w} := ⟨PEmpty, fun i => i.elim⟩
 
-/-- The terminal object of `FamSlice`: the one-object category with the functor constant at the
+/-- The terminal object of `ColaxSliceCart`: the one-object category with the functor constant at the
 empty family. -/
-def terminal : FamSlice.{w, v, u} :=
+def terminal : ColaxSliceCart.{w, v, u} :=
   ⟨Cat.of Pt.{u}, (Functor.const _).obj emptyFam⟩
 
 /-- The unique morphism into `terminal`. -/
-def toTerminal (X : FamSlice.{w, v, u}) : Hom X terminal where
+def toTerminal (X : ColaxSliceCart.{w, v, u}) : Hom X terminal where
   functor := (Functor.const X.cat).obj (Pt.star : Pt.{u})
   nat :=
     { app := fun c => (⟨fun i => i.elim, fun i => i.elim⟩ : Fam.Hom emptyFam (X.F.obj c))
       naturality := fun _ _ _ => Fam.Hom.ext' (funext fun i => i.elim) (fun i => i.elim) }
   isPointwiseCartesian := fun _ i => i.elim
 
-lemma eq_toTerminal {X : FamSlice.{w, v, u}} (m : Hom X terminal) : m = toTerminal X := by
+lemma eq_toTerminal {X : ColaxSliceCart.{w, v, u}} (m : Hom X terminal) : m = toTerminal X := by
   refine Hom.ext_of_functor_eq ?_ (fun c => heq_of_eq (funext fun i => i.elim))
   refine Functor.ext (fun c => ?_) (fun _ _ _ => rfl)
   cases m.functor.obj c
   rfl
 
-/-- `terminal` is a terminal object of `FamSlice`. -/
-def isTerminal : IsTerminal (terminal : FamSlice.{w, v, u}) :=
+/-- `terminal` is a terminal object of `ColaxSliceCart`.
+
+[Paper, §4.1, Thm. `thm:colax-exponentiable`] and [Paper, App. A.4, Prop. `prop:cartesian-colax-lexp`]: terminal object. -/
+def isTerminal : IsTerminal (terminal : ColaxSliceCart.{w, v, u}) :=
   IsTerminal.ofUniqueHom (fun X => toTerminal X) (fun _ m => eq_toTerminal m)
 
-/-- `FamSlice` has a terminal object. -/
-instance hasTerminal : HasTerminal FamSlice.{w, v, u} := isTerminal.hasTerminal
+/-- `ColaxSliceCart` has a terminal object. -/
+instance hasTerminal : HasTerminal ColaxSliceCart.{w, v, u} := isTerminal.hasTerminal
 
-end FamSlice
+end ColaxSliceCart
 
-namespace FamSlice
+namespace ColaxSliceCart
 
 /-! ### Pullbacks -/
 
 section Pullback
 
-variable {X Y Z : FamSlice.{w, v, u}} (f : Hom X Z) (g : Hom Y Z)
+variable {X Y Z : ColaxSliceCart.{w, v, u}} (f : Hom X Z) (g : Hom Y Z)
 
 /-- Objects of the strict pullback of the underlying categories. -/
 @[ext]
@@ -360,16 +370,16 @@ def pbFam : PbObj f g ⥤ Fam.{w} where
 
 end Pullback
 
-end FamSlice
+end ColaxSliceCart
 
-namespace FamSlice
+namespace ColaxSliceCart
 
 section PullbackCone
 
-variable {X Y Z : FamSlice.{w, v, u}} (f : Hom X Z) (g : Hom Y Z)
+variable {X Y Z : ColaxSliceCart.{w, v, u}} (f : Hom X Z) (g : Hom Y Z)
 
-/-- The pullback object in `FamSlice`. -/
-def pbObj : FamSlice.{w, v, u} := ⟨Cat.of (PbObj f g), pbFam f g⟩
+/-- The pullback object in `ColaxSliceCart`. -/
+def pbObj : ColaxSliceCart.{w, v, u} := ⟨Cat.of (PbObj f g), pbFam f g⟩
 
 /-- The first projection out of the pullback. -/
 def pbFst : Hom (pbObj f g) X where
@@ -405,13 +415,13 @@ lemma pb_condition : Hom.comp (pbFst f g) f = Hom.comp (pbSnd f g) g := by
 
 end PullbackCone
 
-end FamSlice
+end ColaxSliceCart
 
-namespace FamSlice
+namespace ColaxSliceCart
 
 section PullbackLift
 
-variable {X Y Z Q : FamSlice.{w, v, u}} {f : Hom X Z} {g : Hom Y Z} (L : Hom Q X) (M : Hom Q Y)
+variable {X Y Z Q : ColaxSliceCart.{w, v, u}} {f : Hom X Z} {g : Hom Y Z} (L : Hom Q X) (M : Hom Q Y)
   (hw : Hom.comp L f = Hom.comp M g)
 
 include hw in
@@ -509,19 +519,21 @@ lemma pbLift_uniq (m : Hom Q (pbObj f g)) (h₁ : Hom.comp m (pbFst f g) = L)
 
 end PullbackLift
 
-end FamSlice
+end ColaxSliceCart
 
-namespace FamSlice
+namespace ColaxSliceCart
 
 section HasPullbacks
 
-variable {X Y Z : FamSlice.{w, v, u}} (f : X ⟶ Z) (g : Y ⟶ Z)
+variable {X Y Z : ColaxSliceCart.{w, v, u}} (f : X ⟶ Z) (g : Y ⟶ Z)
 
-/-- The pullback cone in `FamSlice`. -/
+/-- The pullback cone in `ColaxSliceCart`. -/
 def pullbackCone : PullbackCone f g :=
   PullbackCone.mk (W := pbObj f g) (pbFst f g) (pbSnd f g) (pb_condition f g)
 
-/-- The pullback cone in `FamSlice` is a limit cone. -/
+/-- The pullback cone in `ColaxSliceCart` is a limit cone.
+
+[Paper, §4.1, Thm. `thm:colax-exponentiable`] and [Paper, App. A.4, Prop. `prop:cartesian-colax-lexp`]: pullbacks. -/
 def pullbackConeIsLimit : IsLimit (pullbackCone f g) :=
   PullbackCone.IsLimit.mk (pb_condition f g)
     (fun s => pbLift s.fst s.snd s.condition)
@@ -534,8 +546,8 @@ instance hasPullback : HasPullback f g :=
 
 end HasPullbacks
 
-/-- `FamSlice` has all pullbacks. -/
-instance hasPullbacks : HasPullbacks FamSlice.{w, v, u} :=
+/-- `ColaxSliceCart` has all pullbacks. -/
+instance hasPullbacks : HasPullbacks ColaxSliceCart.{w, v, u} :=
   hasPullbacks_of_hasLimit_cospan _
 
-end FamSlice
+end ColaxSliceCart

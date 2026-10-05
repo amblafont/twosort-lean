@@ -1,39 +1,54 @@
-import CartexpAristotle.PointedForget
-import CartexpAristotle.FamSliceLimits
+import CartexpAristotle.CatExponentiable
+import CartexpAristotle.ColaxSliceCartLimits
 
 /-!
-# The forgetful functor from pointed types is an exponentiable arrow in `FamSlice`
+# The forgetful functor from pointed types is an exponentiable arrow in `ColaxSliceCart`
 
 We equip `Type w` and `Pointed` with the functors to `Fam` sending a (pointed) type `X` to the
 family with base `PUnit` and fibre `X`. The forgetful functor `Pointed ⥤ Type w`, together with
-the identity natural transformation, is then a morphism `UFam` in `FamSlice`, lying over the
+the identity natural transformation, is then a morphism `UFam` in `ColaxSliceCart`, lying over the
 exponentiable arrow `PointedForget.U` of `Cat`. We show that `UFam` is again exponentiable.
+
+## References
+
+* [Paper, §4, Example `ex:main-thms`]: the family functors of sets and of pointed sets, sending
+  `A` to the family `(A)_{* ∈ {*}}` (`setFam`, `ptFam`).
+* [Paper, §4.1, Thm. `thm:colax-exponentiable`] and [Paper, App. A.4, Prop.
+  `prop:cartesian-colax-lexp`]: the forgetful functor `PtdSet → Set`, with the identity natural
+  transformation between these family functors, is exponentiable in `CAT //_c Fam`
+  (`UFam`, `expData`, `expUniversal`).
 -/
 
-open CategoryTheory Limits FamSlice PointedForget
+open CategoryTheory Limits ColaxSliceCart PointedForget
 
 universe w
 
-namespace FamPointedForget
+namespace ColaxSliceCartExponentiable
 
-/-- A type `X`, viewed as the family with base `PUnit` and fibre `X`. -/
+/-- A type `X`, viewed as the family with base `PUnit` and fibre `X`.
+
+[Paper, §4, Example `ex:main-thms`]: the family functor of sets. -/
 def setFam : Type w ⥤ Fam.{w} where
   obj X := ⟨PUnit, fun _ => X⟩
   map f := ⟨id, fun _ => f⟩
 
-/-- A pointed type `X`, viewed as the family with base `PUnit` and fibre `X`. -/
+/-- A pointed type `X`, viewed as the family with base `PUnit` and fibre `X`.
+
+[Paper, §4, Example `ex:main-thms`]: the family functor of pointed sets. -/
 def ptFam : Pointed.{w} ⥤ Fam.{w} where
   obj X := ⟨PUnit, fun _ => X.X⟩
   map f := ⟨id, fun _ => f.toFun⟩
 
-/-- The object `(Type w, setFam)` of `FamSlice`. -/
-def SetObj : FamSlice.{w, w, w + 1} := ⟨Cat.of (Type w), setFam⟩
+/-- The object `(Type w, setFam)` of `ColaxSliceCart`. -/
+def SetObj : ColaxSliceCart.{w, w, w + 1} := ⟨Cat.of (Type w), setFam⟩
 
-/-- The object `(Pointed, ptFam)` of `FamSlice`. -/
-def PtObj : FamSlice.{w, w, w + 1} := ⟨Cat.of Pointed.{w}, ptFam⟩
+/-- The object `(Pointed, ptFam)` of `ColaxSliceCart`. -/
+def PtObj : ColaxSliceCart.{w, w, w + 1} := ⟨Cat.of Pointed.{w}, ptFam⟩
 
-/-- The forgetful functor `Pointed ⥤ Type w` as a morphism of `FamSlice`: its natural
-transformation `U ⋙ setFam ⟶ ptFam` is the identity. -/
+/-- The forgetful functor `Pointed ⥤ Type w` as a morphism of `ColaxSliceCart`: its natural
+transformation `U ⋙ setFam ⟶ ptFam` is the identity.
+
+[Paper, §4.1, Thm. `thm:colax-exponentiable`]: the exponentiable morphism of `CAT //_c Fam`. -/
 def UFam : PtObj.{w} ⟶ SetObj.{w} where
   functor := U.toFunctor
   nat :=
@@ -48,11 +63,11 @@ lemma UFam_functor : UFam.{w}.functor = U.{w}.toFunctor := rfl
 
 section Pullback
 
-variable {D : FamSlice.{w, w, w + 1}} (h : D ⟶ SetObj.{w})
+variable {D : ColaxSliceCart.{w, w, w + 1}} (h : D ⟶ SetObj.{w})
 
 /-- The pullback of `UFam` along `h = (h₀, m)`: the category of elements of `h₀`, with the
 family of `(d, a)` being the family of `d`. -/
-def pbObj : FamSlice.{w, w, w + 1} :=
+def pbObj : ColaxSliceCart.{w, w, w + 1} :=
   ⟨Cat.of h.functor.Elements, CategoryOfElements.π h.functor ⋙ D.F⟩
 
 /-- The first projection of the pullback. -/
@@ -166,8 +181,8 @@ def expFam : FormalCoproduct.{w} C ⥤ Fam.{w} where
       · rfl
       · exact Fam.Hom.congr_fiber (G.map_comp (f.φ a) (g.φ (f.f a))) i x
 
-/-- The partial exponential, as an object of `FamSlice`. -/
-def expObj : FamSlice.{w, w, w + 1} := ⟨Cat.of (FormalCoproduct.{w} C), expFam G⟩
+/-- The partial exponential, as an object of `ColaxSliceCart`. -/
+def expObj : ColaxSliceCart.{w, w, w + 1} := ⟨Cat.of (FormalCoproduct.{w} C), expFam G⟩
 
 /-- The projection of the partial exponential to `SetObj`. -/
 def expPi : expObj G ⟶ SetObj.{w} where
@@ -178,7 +193,7 @@ def expPi : expObj G ⟶ SetObj.{w} where
   isPointwiseCartesian _ _ := ⟨rfl, fun _ => rfl⟩
 
 /-- The counit of the partial exponential. -/
-def expEps : pbObj (expPi G) ⟶ (⟨C, G⟩ : FamSlice.{w, w, w + 1}) where
+def expEps : pbObj (expPi G) ⟶ (⟨C, G⟩ : ColaxSliceCart.{w, w, w + 1}) where
   functor := eps C
   nat :=
     { app x := (⟨fun i => .inr ⟨x.2, i⟩, fun _ y => y⟩ :
@@ -197,7 +212,7 @@ def expEps : pbObj (expPi G) ⟶ (⟨C, G⟩ : FamSlice.{w, w, w + 1}) where
   isPointwiseCartesian _ _ := ⟨rfl, fun _ => rfl⟩
 
 /-- The partial exponential data of `UFam` at `(C, G)`. -/
-def expData : Data UFam.{w} (⟨C, G⟩ : FamSlice.{w, w, w + 1}) where
+def expData : Data UFam.{w} (⟨C, G⟩ : ColaxSliceCart.{w, w, w + 1}) where
   P := expObj G
   pi := expPi G
   Pbk := pbChosen (expPi G)
@@ -209,11 +224,11 @@ end Exp
 
 section Universal
 
-variable {C : Cat.{w, w + 1}} {G : C ⥤ Fam.{w}} {D : FamSlice.{w, w, w + 1}}
+variable {C : Cat.{w, w + 1}} {G : C ⥤ Fam.{w}} {D : ColaxSliceCart.{w, w, w + 1}}
 
 section Mor
 
-variable (f : D ⟶ SetObj.{w}) (g : pbObj f ⟶ (⟨C, G⟩ : FamSlice.{w, w, w + 1}))
+variable (f : D ⟶ SetObj.{w}) (g : pbObj f ⟶ (⟨C, G⟩ : ColaxSliceCart.{w, w, w + 1}))
 
 /-- The base map of the natural transformation of `morHom f g`. -/
 def morBase (x : D.cat) :
@@ -301,13 +316,15 @@ lemma recon' : k = morHom h (psiHom k h e ≫ expEps G) := by
 
 end Psi
 
-lemma morHom_comm (f : D ⟶ SetObj.{w}) (g : pbObj f ⟶ (⟨C, G⟩ : FamSlice.{w, w, w + 1})) :
+lemma morHom_comm (f : D ⟶ SetObj.{w}) (g : pbObj f ⟶ (⟨C, G⟩ : ColaxSliceCart.{w, w, w + 1})) :
     g = FBF_on_mor (expData G) (pbChosen f) (morHom_isSlice f g) ≫ expEps G := by
   rw [fbf_eq']
   exact Hom.ext_of_functor_eq (psi_eps f.functor g.functor).symm (fun _ => HEq.rfl)
 
 variable (G) in
-/-- `expData G` is universal. -/
+/-- `expData G` is universal.
+
+[Paper, §4.1, Thm. `thm:colax-exponentiable`]: `UFam` is exponentiable. -/
 @[reducible]
 noncomputable def expUniversal : Universal (expData G) :=
   universal_of_chosen (expData G) (fun f => pbChosen f)
@@ -322,9 +339,9 @@ noncomputable def expUniversal : Universal (expData G) :=
 end Universal
 
 /-- The forgetful functor from pointed types, equipped with the identity natural transformation
-between the singleton-base families, is an exponentiable arrow in `FamSlice`. -/
+between the singleton-base families, is an exponentiable arrow in `ColaxSliceCart`. -/
 noncomputable instance isExpArr_UFam : IsExpArr UFam.{w} where
   isExpArrowData c := expData c.F
   isExpArrow c := expUniversal c.F
 
-end FamPointedForget
+end ColaxSliceCartExponentiable

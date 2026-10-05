@@ -18,23 +18,30 @@ appendix) and a model `K` of `G a`.
 * `psiF G K : TmFam a ⟶ famF G a K`: the interpretation of all sorts and terms of `a` in `K`.
 * `D G K`: the functor `Γ ↦ Collage (σ ↦ G σ K)` over families of types, where the sorts `σ` lie
   over `TmFam a` and the arrows `σ ⟶ e` lie over `psiF G K` followed by the family of the arrow.
+
+## References
+
+* [Paper, App. C, Notation before Cor. `cor:faithful-via-terms`]: `TmFam a` is the family
+  `Tm_Ω` of terms of `Ω`.
+* The collage `D G K` replaces the constant functor used in the proof of
+  [Paper, App. C.1, Prop. `prop:model-faithful`]; see `FULL_FAITHFULNESS_PROOF_COMPARISON.md`.
 -/
 
 open CategoryTheory Limits
 
 universe w
 
-namespace ExpArrCat
+namespace Lexp
 
 namespace TwoSortFF
 
-open FamOverExpArr PointedForget SliceExp
+open SemanticTwoSortFunctor PointedForget SliceExp
 
 noncomputable section
 
 section Terms
 
-variable {A : ExpArrCat.{w + 1, w + 2}} [LocallySmall.{w} A.carrier] (a : A.carrier)
+variable {A : Lexp.{w + 1, w + 2}} [LocallySmall.{w} A.carrier] (a : A.carrier)
 
 /-- A sort of `a`, shrunk to `Type w`. -/
 abbrev shX (B : a ⟶ A.cod) : Shrink.{w} (a ⟶ A.cod) := equivShrink _ B
@@ -81,14 +88,16 @@ lemma eq_of_tmS_heq' {t : a ⟶ A.dom} {b : Shrink.{w} (a ⟶ A.cod)} (s : TmS a
   refine valS_eq_of_heq a hb ⟨t, rfl⟩ (tmSOf a s) (h.trans ?_)
   simp [tmSOf]
 
-/-- The family of terms of `a`: the family `(Tm B)_{B : a ⟶ X}`. -/
+/-- The family of terms of `a`: the family `(Tm B)_{B : a ⟶ X}`.
+
+[Paper, App. C, Notation before Cor. `cor:faithful-via-terms`]: the family `Tm_Ω`. -/
 def TmFam : FormalCoproduct.{w} (Type w) := ⟨Shrink.{w} (a ⟶ A.cod), TmS a⟩
 
 end Terms
 
 section Readouts
 
-variable {A : ExpArrCat.{w + 1, w + 2}} (G : A ⟶ C₀.{w}) {a : A.carrier}
+variable {A : Lexp.{w + 1, w + 2}} (G : A ⟶ C₀.{w}) {a : A.carrier}
 
 lemma famF_map_obj {Γ Γ' : A.carrier} (σ : Γ ⟶ Γ') (K : GL G Γ) :
     (famF G Γ').obj ((Gm G σ).obj K) = (famF G Γ).obj K :=
@@ -139,7 +148,9 @@ lemma elY_heq (t : a ⟶ A.dom) (K : GL G a) : elY G t K ≍ mptG G ((Gm G t).ob
 
 variable [LocallySmall.{w} A.carrier]
 
-/-- The interpretation in `K` of all sorts and terms of `a`, as a morphism of families. -/
+/-- The interpretation in `K` of all sorts and terms of `a`, as a morphism of families.
+
+The interpretation `ψ` of [Paper, App. C.2]. -/
 def psiF (K : GL G a) : TmFam a ⟶ (famF G a).obj K where
   f b := ixX G (unX a b) K
   φ _ := fun s => cast (congrArg (fun B => ((famF G a).obj K).obj (ixX G B K)) (tmSOf_arr a s))
@@ -155,7 +166,7 @@ end Readouts
 
 section Collage
 
-variable {A : ExpArrCat.{w + 1, w + 2}} [LocallySmall.{w} A.carrier] (G : A ⟶ C₀.{w})
+variable {A : Lexp.{w + 1, w + 2}} [LocallySmall.{w} A.carrier] (G : A ⟶ C₀.{w})
   {a : A.carrier} (K : GL G a)
 
 /-- The model `K` as a natural transformation `Disc (a ⟶ -) ⟶ G`, `σ ↦ G σ K`. -/
@@ -221,4 +232,4 @@ end
 
 end TwoSortFF
 
-end ExpArrCat
+end Lexp

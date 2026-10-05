@@ -12,10 +12,18 @@ public import Mathlib.CategoryTheory.Whiskering
 * A morphism of families is *cartesian* (`Fam.Hom.IsCartesian`) if each of its maps between
   fibres `X i → Y (f i)` is the identity function (in particular `X i = Y (f i)`). The map on base
   types is arbitrary.
-* `FamSlice` is the cartesian colax slice category of categories over `Fam`.  An object is a
+* `ColaxSliceCart` is the cartesian colax slice category of categories over `Fam`.  An object is a
   category `C` with a functor `F : C ⥤ Fam`.  A morphism from `F : C ⥤ Fam` to `G : D ⥤ Fam` is a
   functor `H : C ⥤ D` together with a natural transformation `n : H ⋙ G ⟶ F` all of whose
   components are cartesian.
+
+## References
+
+* [Paper, §2.2, Definition of family fibrations] and [Paper, §4.1, Notation `not:FamSet`]:
+  `Fam` is the category `Fam(Set)` of set-indexed families of sets.
+* [Paper, §4, footnote on cartesian morphisms]: `Fam.Hom.IsCartesian`.
+* [Paper, §4.1, Definition of the cartesian colax slice category `CAT //_c Fam`]:
+  `ColaxSliceCart`.
 -/
 
 @[expose] public section
@@ -24,7 +32,9 @@ universe w v u
 
 open CategoryTheory
 
-/-- A family of types: an index type together with a type for every index. -/
+/-- A family of types: an index type together with a type for every index.
+
+[Paper, §2.2, Definition of family fibrations] and [Paper, §4.1, Notation `not:FamSet`]: `Fam(Set)`. -/
 structure Fam where
   /-- The base (index) type. -/
   base : Type w
@@ -59,7 +69,9 @@ instance : Category Fam.{w} where
 /-- A morphism of families is *cartesian* if each of its maps between fibres is the identity
 function. The map on base types is arbitrary. Since the fibres `X.fiber i` and
 `Y.fiber (f.base i)` are a priori different types, this is stated as: for every index `i` the two
-fibres are equal, and along this equality the fibre map is the identity. -/
+fibres are equal, and along this equality the fibre map is the identity.
+
+[Paper, §4, footnote]: cartesian morphisms of families. -/
 def Hom.IsCartesian {X Y : Fam.{w}} (f : X ⟶ Y) : Prop :=
   ∀ i, ∃ h : X.fiber i = Y.fiber ((f : Hom X Y).base i),
     ∀ x, (f : Hom X Y).fiber i x = cast h x
@@ -84,18 +96,20 @@ def CategoryTheory.NatTrans.IsPointwiseCartesian {C : Type u} [Category.{v} C]
   ∀ c, (n.app c).IsCartesian
 
 /-- An object of the cartesian colax slice over `Fam`: a category equipped with a functor
-to `Fam`. -/
-structure FamSlice where
+to `Fam`.
+
+[Paper, §4.1, Definition of `CAT //_c Fam`]: the cartesian colax slice category. -/
+structure ColaxSliceCart where
   /-- The underlying category. -/
   cat : Cat.{v, u}
   /-- The functor to `Fam`. -/
   F : cat ⥤ Fam.{w}
 
-namespace FamSlice
+namespace ColaxSliceCart
 
 /-- A morphism `(C, F) ⟶ (D, G)` in the cartesian colax slice over `Fam`: a functor `H : C ⥤ D`
 together with a pointwise cartesian natural transformation `H ⋙ G ⟶ F`. -/
-structure Hom (X Y : FamSlice.{w, v, u}) where
+structure Hom (X Y : ColaxSliceCart.{w, v, u}) where
   /-- The functor between the underlying categories. -/
   functor : X.cat ⥤ Y.cat
   /-- The natural transformation `H ⋙ G ⟶ F`. -/
@@ -104,20 +118,20 @@ structure Hom (X Y : FamSlice.{w, v, u}) where
   isPointwiseCartesian : nat.IsPointwiseCartesian
 
 /-- The identity morphism. -/
-def Hom.id (X : FamSlice.{w, v, u}) : Hom X X where
+def Hom.id (X : ColaxSliceCart.{w, v, u}) : Hom X X where
   functor := 𝟭 X.cat
   nat := 𝟙 X.F
   isPointwiseCartesian _ := Fam.Hom.isCartesian_id _
 
 /-- Composition of morphisms: functors compose, and the natural transformations are pasted
 as `whiskerLeft H m ≫ n`. -/
-def Hom.comp {X Y Z : FamSlice.{w, v, u}} (f : Hom X Y) (g : Hom Y Z) : Hom X Z where
+def Hom.comp {X Y Z : ColaxSliceCart.{w, v, u}} (f : Hom X Y) (g : Hom Y Z) : Hom X Z where
   functor := f.functor ⋙ g.functor
   nat := Functor.whiskerLeft f.functor g.nat ≫ f.nat
   isPointwiseCartesian c :=
     (g.isPointwiseCartesian (f.functor.obj c)).comp (f.isPointwiseCartesian c)
 
-instance : Category FamSlice.{w, v, u} where
+instance : Category ColaxSliceCart.{w, v, u} where
   Hom := Hom
   id := Hom.id
   comp := Hom.comp
@@ -133,4 +147,4 @@ instance : Category FamSlice.{w, v, u} where
     simp only [Hom.comp]
     congr 1
 
-end FamSlice
+end ColaxSliceCart

@@ -1,5 +1,17 @@
 import CartexpAristotle.SliceExponentiable
 
+/-!
+# Functoriality of the slice construction
+
+A pullback-preserving functor `F : C ⥤ E` with an isomorphism `F (P X) ≅ P X'` induces a functor
+`C / P X ⥤ E / P X'` (`SliceExp.sliceMap`), which preserves the exponentiable arrow `p̲`.
+
+## References
+
+* [Paper, §4.2, Prop. `prop:lexp-functor-p2`]: the image `MFunctor{F}` of a `Lexp`-functor `F` by the
+  endofunctor `- / PX` maps `Z → P_p X` to `F Z → F P_p X ≅ P_{p'} X'`.
+-/
+
 open CategoryTheory Limits
 
 universe v u v₂ u₂

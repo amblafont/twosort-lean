@@ -10,7 +10,7 @@ import CartexpAristotle.InitialModelUnique
 /-!
 # The images of the model functor have initial objects
 
-Let `FinGat` be a bi-initial object of `ExpArrCat` and `M : FinGat ⟶ CatExp` the model functor.
+Let `FinGat` be a bi-initial object of `Lexp` and `M : FinGat ⟶ CatLexp` the model functor.
 We show that for every object `a` of `FinGat`, the category `M a` has an initial object, assuming
 that the hom-types of `FinGat` are `w`-small. The initial object is the term model of `a`,
 constructed in `CartexpAristotle.InitialModel` following the appendix ("Initial models of GATs"),
@@ -18,15 +18,20 @@ and shown to be initial in `CartexpAristotle.InitialModelUnique`.
 
 The lemmas below also record the individual closure properties of the objects whose models have
 an initial object (isomorphisms, terminal object, `Y`, `X`, exponentials, pullbacks).
+
+## References
+
+* [Paper, App. B, Cor. `cor:initial-model-gat`]: every theory has an initial model
+  (`Lexp.modelFunctor_hasInitial`).
 -/
 
 open CategoryTheory Limits
 
 universe w
 
-namespace ExpArrCat
+namespace Lexp
 
-open FamOverExpArr PointedForget
+open SemanticTwoSortFunctor PointedForget
 
 section Lemmas
 
@@ -67,7 +72,7 @@ instance hasInitial_formalCoproduct (C : Type (w + 1)) [Category.{w} C] :
 
 end Lemmas
 
-variable {FinGat : ExpArrCat.{w + 1, w + 2}} (hFinGat : IsBiInitial FinGat)
+variable {FinGat : Lexp.{w + 1, w + 2}} (hFinGat : IsBiInitial FinGat)
 
 /-- The underlying functor of the model functor. -/
 noncomputable abbrev modelFun : FinGat.carrier ⥤ Cat.{w, w + 1} := (modelFunctor hFinGat).functor
@@ -100,9 +105,9 @@ lemma modelHasInitial_exp (c : FinGat.carrier) (hc : ModelHasInitial hFinGat c) 
   let d := IsExpArr.isExpArrowData (u := FinGat.arr) c
   haveI : Universal (functor_on M.functor d) :=
     FunctorPreserves.functor_preserves d (IsExpArr.isExpArrow c)
-  let d₂ : Data CatExp.{w}.arr (M.functor.obj c) := lift_arrow_iso M.iso (functor_on M.functor d)
+  let d₂ : Data CatLexp.{w}.arr (M.functor.obj c) := lift_arrow_iso M.iso (functor_on M.functor d)
   haveI : Universal d₂ := lift_arrow_iso_univ M.iso (functor_on M.functor d)
-  let e := IsExpArr.isExpArrowData (u := CatExp.{w}.arr) (M.functor.obj c)
+  let e := IsExpArr.isExpArrowData (u := CatLexp.{w}.arr) (M.functor.obj c)
   haveI : Universal e := IsExpArr.isExpArrow _
   haveI : IsIso (canonical_mor d₂ e) := isIso_canonical_mor d₂ e
   have i : (Cat.of (FormalCoproduct.{w} ((modelFun hFinGat).obj c)) : Cat.{w, w + 1}) ≅
@@ -112,13 +117,15 @@ lemma modelHasInitial_exp (c : FinGat.carrier) (hc : ModelHasInitial hFinGat c) 
 /-- **The images of the model functor have initial objects.** For every object `a` of a
 bi-initial `FinGat` whose hom-types are `w`-small, the category `M a` has an initial object, where
 `M` is the model functor. The initial object is the term model
-`ExpArrCat.InitialModel.zero (modelFunctor hFinGat) hFinGat`. -/
+`Lexp.InitialModel.zero (modelFunctor hFinGat) hFinGat`.
+
+[Paper, App. B, Cor. `cor:initial-model-gat`]. -/
 theorem modelFunctor_hasInitial [LocallySmall.{w} FinGat.carrier] (a : FinGat.carrier) :
     HasInitial ((modelFun hFinGat).obj a) :=
   (InitialModel.isInitialZero (a := a) (modelFunctor hFinGat) hFinGat).hasInitial
 
 /-
-The earlier inductive approach (via `ExpArrCat.IsBiInitial.induction`) needed the following
+The earlier inductive approach (via `Lexp.IsBiInitial.induction`) needed the following
 closure property, which was left unproved. It does not follow from the closure hypotheses
 `h₁ h₂ hS` alone, since a pullback of categories with initial objects need not have an initial
 object. The statement above
@@ -132,4 +139,4 @@ lemma modelHasInitial_pullback {W X₁ X₂ S : FinGat.carrier} {fst : W ⟶ X�
   sorry
 -/
 
-end ExpArrCat
+end Lexp

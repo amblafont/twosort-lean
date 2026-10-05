@@ -12,27 +12,34 @@ We continue `CartexpAristotle.TwoSortFFSquare`. By bi-initiality, there is a uni
 transformation `gammaT : D G K ⟶ G` restricting to the square `sq G K` at `p`. It restricts to the
 identity on the second part of the collage (`gammaT_obj_inr`). This yields:
 
-* the model `NM G K hA = gammaT_a (inl (𝟙 a))` of `G a` (the object `M_Ω` of
-  Proposition "model-faithful" of the appendix): its family is `TmFam a` (`famF_NM`), and the
-  image of `NM` by `G B` (resp. `G t`) is the family of terms with the index `B` (resp. with the
-  index `t ≫ p` and the element `t`) (`isoX_NM`, `gY_NM`);
-* a morphism `jHom : NM G K hA ⟶ K` whose image on families is the interpretation `psiF G K` of
+* the model `MOmega G K hA = gammaT_a (inl (𝟙 a))` of `G a` (the object `M_Ω` of
+  Proposition "model-faithful" of the appendix): its family is `TmFam a` (`famF_MOmega`), and the
+  image of `MOmega` by `G B` (resp. `G t`) is the family of terms with the index `B` (resp. with the
+  index `t ≫ p` and the element `t`) (`isoX_MOmega`, `gY_MOmega`);
+* a morphism `jHom : MOmega G K hA ⟶ K` whose image on families is the interpretation `psiF G K` of
   the sorts and terms of `a` in `K` (`famF_jHom`).
+
+## References
+
+* [Paper, App. C.1, Prop. `prop:model-faithful`]: `MOmega` is the object `M_Ω`, with
+  `famF_MOmega`, `isoX_MOmega`, `gY_MOmega` giving the two items of the proposition.
+* `jHom` is used instead of the colax-slice argument of
+  [Paper, App. C.2, Prop. `prop:section-terms-two-sortification`].
 -/
 
 open CategoryTheory Limits
 
 universe w
 
-namespace ExpArrCat
+namespace Lexp
 
 namespace TwoSortFF
 
-open FamOverExpArr PointedForget SliceExp
+open SemanticTwoSortFunctor PointedForget SliceExp
 
 noncomputable section
 
-variable {A : ExpArrCat.{w + 1, w + 2}} [LocallySmall.{w} A.carrier] (G : A ⟶ C₀.{w})
+variable {A : Lexp.{w + 1, w + 2}} [LocallySmall.{w} A.carrier] (G : A ⟶ C₀.{w})
   {a : A.carrier} (K : GL G a) (hA : IsBiInitial A)
 
 include hA in
@@ -82,14 +89,16 @@ lemma gammaT_obj_inr (e : GL G a) : ((gammaT G K hA).app a).left.toFunctor.obj (
   Functor.congr_obj (congrArg (fun (T : G.functor ⟶ G.functor) => (T.app a).left.toFunctor)
     (gamma_restrict₂ G K hA)) e
 
-/-- **The model `M_Ω`** of the appendix: the image of `inl (𝟙 a)`. -/
-def NM : GL G a := ((gammaT G K hA).app a).left.toFunctor.obj (.inl (𝟙 a))
+/-- **The model `M_Ω`** of the appendix: the image of `inl (𝟙 a)`.
 
-lemma famF_NM : (famF G a).obj (NM G K hA) = TmFam a :=
+[Paper, App. C.1, Prop. `prop:model-faithful`]: the object `M_Ω`. -/
+def MOmega : GL G a := ((gammaT G K hA).app a).left.toFunctor.obj (.inl (𝟙 a))
+
+lemma famF_MOmega : (famF G a).obj (MOmega G K hA) = TmFam a :=
   Functor.congr_obj (congrArg Cat.Hom.toFunctor (Over.w ((gammaT G K hA).app a))) (.inl (𝟙 a))
 
-lemma Gm_NM {Γ : A.carrier} (σ : a ⟶ Γ) :
-    (Gm G σ).obj (NM G K hA) = ((gammaT G K hA).app Γ).left.toFunctor.obj (.inl σ) := by
+lemma Gm_MOmega {Γ : A.carrier} (σ : a ⟶ Γ) :
+    (Gm G σ).obj (MOmega G K hA) = ((gammaT G K hA).app Γ).left.toFunctor.obj (.inl σ) := by
   have h := Functor.congr_obj (congrArg (fun T => T.left.toFunctor)
     ((gammaT G K hA).naturality σ)) (.inl (𝟙 a))
   refine h.symm.trans ?_
@@ -97,15 +106,15 @@ lemma Gm_NM {Γ : A.carrier} (σ : a ⟶ Γ) :
   rw [Category.id_comp]
 
 /-- The image of `M_Ω` by `G B` is the family of terms with the index `B`. -/
-lemma isoX_NM (B : a ⟶ A.cod) : (isoX G).obj ((Gm G B).obj (NM G K hA)) = tmElt B := by
-  rw [Gm_NM]
+lemma isoX_MOmega (B : a ⟶ A.cod) : (isoX G).obj ((Gm G B).obj (MOmega G K hA)) = tmElt B := by
+  rw [Gm_MOmega]
   exact Functor.congr_obj (congrArg (fun T => T.left.toFunctor) (gammaT_right G K hA)) (.inl B)
 
 /-- The image of `M_Ω` by `G t` is the family of terms with the index `t ≫ p` and the
 element `t`. -/
-lemma gY_NM (t : a ⟶ A.dom) : (gY G).obj ((Gm G t).obj (NM G K hA)) =
+lemma gY_MOmega (t : a ⟶ A.dom) : (gY G).obj ((Gm G t).obj (MOmega G K hA)) =
     (⟨TmS a (shX a (t ≫ A.arr)), tmS a t⟩ : Pointed.{w}) := by
-  rw [Gm_NM]
+  rw [Gm_MOmega]
   have h₁ := Functor.congr_obj (congrArg (fun T => T.left.toFunctor) (gammaT_left G K hA)) (.inl t)
   have h₂ := Functor.congr_obj (congrArg Cat.Hom.toFunctor (RY_fst G K)) (.inl t)
   change (pullback.fst U.{w} (sE U.{w})).toFunctor.obj
@@ -117,13 +126,13 @@ def crossT : Collage.Hom ((betaZ G K).app a).toFunctor (.inl (𝟙 a)) (.inr K) 
   (eqToHom (Gm_id_obj G a K) : (Gm G (𝟙 a)).obj K ⟶ K)
 
 /-- The morphism from `M_Ω` to `K`. -/
-def jHom : NM G K hA ⟶ K :=
+def jHom : MOmega G K hA ⟶ K :=
   ((gammaT G K hA).app a).left.toFunctor.map (X := .inl (𝟙 a)) (Y := .inr K) (crossT G K) ≫
     eqToHom (gammaT_obj_inr G K hA K)
 
 /-- The image of `jHom` on families is the interpretation of the sorts and terms of `a`
 in `K`. -/
-lemma famF_jHom : (famF G a).map (jHom G K hA) = eqToHom (famF_NM G K hA) ≫ psiF G K := by
+lemma famF_jHom : (famF G a).map (jHom G K hA) = eqToHom (famF_MOmega G K hA) ≫ psiF G K := by
   have h := Functor.congr_hom (congrArg Cat.Hom.toFunctor (Over.w ((gammaT G K hA).app a)))
     (X := .inl (𝟙 a)) (Y := .inr K) (crossT G K)
   simp only [Cat.Hom.comp_toFunctor, Functor.comp_map] at h
@@ -136,4 +145,4 @@ end
 
 end TwoSortFF
 
-end ExpArrCat
+end Lexp

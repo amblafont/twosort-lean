@@ -16,6 +16,16 @@ The declarations mirror the Rocq originals:
   on morphisms,
 * `Universal` equips the data with the universal property needed to promote it
   to a structure of an adjoint.
+
+## References
+
+* [Paper, §2.1, Def. `def:exp-mor`] and [Paper, §2.1, Prop. `prop:exp-mor-P-def`]: a morphism
+  `f : Y → X` is exponentiable iff `dom ∘ f^* : C/X → C` has a right adjoint `P_f`. `Data u c`
+  with `Universal` is a value `P_f(c)` of this right adjoint with its counit, and `IsExpArr u` says
+  that it exists for every `c`.
+* [Paper, §2.1, Def. `def:preserves-pushforwards`] and [Paper, §2.1, Lemma
+  `lem:preservation_pushforward`]: `FunctorPreserves u F` says that `F` commutes with `P_u` and
+  `P_{F u}`.
 -/
 
 open CategoryTheory Limits
@@ -35,7 +45,9 @@ variable {X Y : C}
 * a projection `pi` over the codomain of the arrow, which makes it an object of
   the slice category,
 * a pullback `Pbk` which morally is the data of the fiber product over `P`, and
-* a counit `epsilon` which sends `Pbk` back to the starting point `c`. -/
+* a counit `epsilon` which sends `Pbk` back to the starting point `c`.
+
+[Paper, §2.1, Prop. `prop:exp-mor-P-def`]: candidate value `P_u(c)` of the right adjoint of `dom ∘ u^*`, with its counit. -/
 structure Data (u : Y ⟶ X) (c : C) where
   P : C
   pi : P ⟶ X
@@ -63,7 +75,9 @@ following sense:
   `d ⟶ data.P` (which is the first function of the hom-bijection),
 * the morphism `d ⟶ data.P` is a morphism in the slice category,
 * the data satisfies the left triangle operation (denoted `comm` here), and
-* there is a unique morphism satisfying the previous property. -/
+* there is a unique morphism satisfying the previous property.
+
+[Paper, §2.1, Prop. `prop:exp-mor-P-def`]: universality of the counit, i.e. `D.P` is `P_u(c)`. -/
 class Universal (data : Data u c) where
   mor : ∀ {d : C} {f : d ⟶ X} {Kuf : ChosenPullback u f},
       ((Kuf : C) ⟶ c) → (d ⟶ data.P)
@@ -388,7 +402,9 @@ noncomputable def functor_on {u : Y ⟶ X} (F : C ⥤ D) [PreservesLimitsOfShape
   Pbk := functPullback F d.Pbk
   epsilon := F.map d.epsilon
 
-/-- The functor `F` sends universal `Data` for `u` to universal `Data` for `F u`. -/
+/-- The functor `F` sends universal `Data` for `u` to universal `Data` for `F u`.
+
+[Paper, §2.1, Def. `def:preserves-pushforwards`], in the form of [Paper, §2.1, Lemma `lem:preservation_pushforward`]. -/
 class FunctorPreserves (u : Y ⟶ X) (F : C ⥤ D) [PreservesLimitsOfShape WalkingCospan F] where
   functor_preserves : ∀ {c : C} (d : Data u c), Universal d → Universal (functor_on F d)
 
@@ -494,7 +510,9 @@ noncomputable def functor_preserves_iso {X' Y' : C} (u : Y ⟶ X) (v : Y' ⟶ X'
 
 end FunctorPreservation
 
-/-- An arrow `u` is partially exponentiable when every `c` has universal `Data`. -/
+/-- An arrow `u` is partially exponentiable when every `c` has universal `Data`.
+
+[Paper, §2.1, Def. `def:exp-mor`] and [Paper, §2.1, Prop. `prop:exp-mor-P-def`]: exponentiable morphism. -/
 class IsExpArr (u : Y ⟶ X) where
   isExpArrowData : ∀ c : C, Data u c
   isExpArrow : ∀ c : C, Universal (isExpArrowData c)

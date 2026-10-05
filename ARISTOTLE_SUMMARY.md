@@ -1,3 +1,74 @@
+# Summary of changes for run c4f234e0-11d6-4f29-9284-ce55596392a1
+No — when I fixed the Lean errors, I only changed Lean files. I've now checked the Markdown files against the current code and updated them.
+
+**What I checked.** I compared every file name and Lean name written as code in `README.md`, `PAPER_REFERENCES.md`, `INITIALITY_PROOF_COMPARISON.md` and `FULL_FAITHFULNESS_PROOF_COMPARISON.md` with the current sources. None of them mentioned anything the version fixes changed, so nothing in them was wrong because of the fixes. The only names that don't exist any more are in the "Renamings" table of `PAPER_REFERENCES.md`, which lists former names on purpose.
+
+**What I changed:**
+- **`README.md`:** added a "Building" section. It names the Lean version (`v4.28.0`) and the pinned Mathlib commit, and gives the build commands. It also describes the two pieces of code that exist only because the pinned Mathlib is older:
+  - `ChosenPullback.lean`, a local replacement with five fields;
+  - `Comma.fstSndJointlyReflectLimit`, a locally proved lemma. It has one extra assumption, which always holds at its only use.
+- **`PAPER_REFERENCES.md`:** added a short table, "Auxiliary files not from the paper", listing those same two pieces.
+- **`INITIALITY_PROOF_COMPARISON.md`:** replaced `gamma_a`, which isn't a real Lean name, with the actual expression `(gamma ω).app a`.
+
+No Lean code changed. `lake build CartexpAristotle` still succeeds, and the changes are committed. I left `ARISTOTLE_SUMMARY.md` unchanged, as you asked.
+
+# Summary of changes for run 5fafe6f2-c431-4d79-b66a-4eab89be1abf
+I added references to the paper throughout the project and renamed files and definitions to match it. The library still builds with `lake build CartexpAristotle`. The main theorems still depend only on the standard axioms (`propext`, `Classical.choice`, `Quot.sound`). The only `sorry` left is in a commented-out lemma in `InitialModelGat.lean`, as before.
+
+**Renamings.** No proofs changed; only names did.
+- The 2-category `ExpArrCat` is now `Lexp`, as in the paper's Theorem `thm:uemura`.
+- `CatExp` is now `CatLexp`.
+- `FamSlice` / `FamSliceExp` are now `ColaxSliceCart` / `ColaxSliceCartLexp` (the cartesian colax slice).
+- `FamOverExp` is now `CatOverFamLexp`.
+- `twoSortCounit` is now `coreProjectionMorphism` (Def. `def:core-projection-morphism`), and `coreProjection` is now `coreProjectionFunctor`.
+- `NM` is now `MOmega` (the paper's \(\M{Ω}\)).
+- Files were renamed to match, for example:
+  - `UniversalNatTrans.lean` (Thm. `thm:universal-property-natural-transformation`)
+  - `CommaLexp.lean` (Prop. `prop:comma-lexp`)
+  - `Strictification.lean` (Prop. `prop:strictification`)
+  - `CatExponentiable.lean` (Prop. `prop:CAT`)
+  - `SemanticTwoSortFunctor.lean` (Prop. `prop:semantic-twosort-functor`)
+  - `CharacterisationModelsTwoSort.lean` (Thm. `thm:characterisation-models-two-sortification`)
+  - `CoreProjectionMorphism.lean`
+  - `InitialModelGat.lean` (Cor. `cor:initial-model-gat`)
+
+  The two proof-comparison notes were updated to use the new names.
+
+**References.**
+- **Citation format:** the paper has no compiled numbering here, so docstrings cite results as `[Paper, §n, Kind `label`]`, using the section number and the LaTeX `\label` from `s_csl.tex` / `s-appendices_csl.tex`. Results without a label are named by their position, for example "final Corollary of §5.2".
+- **In the Lean files:** every file now has a "References" section in its header, and about 90 main declarations cite the result they formalise.
+- **Overview:** the root file `CartexpAristotle.lean` has a header that explains the citation format and lists the files under each section of the paper.
+- **`PAPER_REFERENCES.md` (new)** contains:
+  - a table of the paper's notation against the Lean names;
+  - a table mapping each result in the main text and appendices to its Lean declarations and file;
+  - a table of former names against new names.
+- **`README.md`** now has a short section pointing to these.
+
+**Not formalised in the project:**
+- §3.2 (family GATs, Prop. `prop:family-gats`) and Appendix A.2, which proves it;
+- Prop. `prop:core_projection_preserves_initial` of §5.1;
+- Appendix D (infinite GATs);
+- the syntactic description of `FinGat` (it is taken to be any bi-initial object of `Lexp`).
+
+A few results are bypassed rather than formalised, for example Prop. `prop:arrow-functor-lexp` and Cor. `cor:faithful-via-terms`. The documentation marks these.
+
+**Properties table.** I could only reach some of the entries from earlier runs. I updated those with the new names and files:
+- `models-two-sortification-iso`
+- `core-projection-is-counit`
+- `family-functor`
+- `two-sort-counit` (now `coreProjectionMorphism`)
+- `two-sortification-fully-faithful`
+- `model-functor-has-initial`
+- `fam-slice-forget-hom`
+- `bi-initial-induction`
+- `initial-model-is-initial`
+- `two-sortification`
+- `model-functor`
+
+The other entries may still show the old names. The renaming table in `PAPER_REFERENCES.md` translates them.
+
+All changes are committed.
+
 # Summary of changes for run a315edfb-bc6a-474d-a20a-163ee14dae67
 I proved both statements in Lean. `lake build CartexpAristotle` succeeds, the three new files contain no `sorry`, and `#print axioms` on the main results shows only `propext`, `Classical.choice` and `Quot.sound`.
 

@@ -9,11 +9,11 @@ import CartexpAristotle.TwoSortFFReadout
 # Two-sortification is fully faithful
 
 We follow the appendix section "Two-sortification is fully faithful". Let `FinGat` be a
-bi-initial object of `ExpArrCat` whose hom-types are `w`-small, `T` the two-sortification
+bi-initial object of `Lexp` whose hom-types are `w`-small, `T` the two-sortification
 functor, and `p : Y ⟶ X` the chosen arrow.
 
 * **Faithfulness at `X` and `Y`** (Corollary "two-sortification-faithful"): the model `M_Ω`
-  (`NM`) of `T a` is sent by `T B` (resp. `T t`) to the family of terms of `a` with the index `B`
+  (`MOmega`) of `T a` is sent by `T B` (resp. `T t`) to the family of terms of `a` with the index `B`
   (resp. the element `t`), so `B` (resp. `t`) can be read off from `T B` (resp. `T t`).
 * **Fullness at `X` and `Y`** (Proposition "section-terms-two-sortification"): let `Z` be the
   initial model of `T a`, `i : Z ⟶ M_Ω` the initial morphism and `j : M_Ω ⟶ Z` the morphism
@@ -22,17 +22,27 @@ functor, and `p : Y ⟶ X` the chosen arrow.
   and back along `j`, shows that `h = T B` where `B` is read off from `h` in `M_Ω`.
 * Faithfulness and fullness at `X` and `Y` extend to all objects
   (Proposition "faithful-at-XGAT-YGAT", `TwoSortificationFullyFaithful`).
+
+## References
+
+* [Paper, App. C.1, Cor. `cor:two-sortification-faithful`]: `twoSort_faithful_cod`,
+  `twoSort_faithful_dom`, and `Lexp.twoSortification_faithful`.
+* [Paper, App. C.2, Prop. `prop:section-terms-two-sortification`]: `twoSort_full_cod`,
+  `twoSort_full_dom`.
+* [Paper, App. C.2, final Corollary] (`T` is fully faithful): `Lexp.twoSortification_full`,
+  `Lexp.twoSortificationFullyFaithful`.
+* [Paper, App. C, Prop. `prop:faithful-at-XGAT-YGAT`]: `twoSortBij_all`.
 -/
 
 open CategoryTheory Limits
 
 universe w
 
-namespace ExpArrCat
+namespace Lexp
 
 namespace TwoSortFF
 
-open FamOverExpArr PointedForget SliceExp InitialModel
+open SemanticTwoSortFunctor PointedForget SliceExp InitialModel
 
 noncomputable section
 
@@ -63,7 +73,7 @@ lemma elements_ext {F : FormalCoproduct.{w} (Type w) ⥤ Type w} {x y : F.Elemen
     (h₁ : x.1 = y.1) (h₂ : x.2 ≍ y.2) : x = y :=
   Sigma.ext h₁ h₂
 
-variable {FinGat : ExpArrCat.{w + 1, w + 2}} {hFinGat : IsBiInitial FinGat} {a : FinGat.carrier}
+variable {FinGat : Lexp.{w + 1, w + 2}} {hFinGat : IsBiInitial FinGat} {a : FinGat.carrier}
 
 lemma Rd_fst (K : GL (GT hFinGat) a)
     (h : (Tw hFinGat).functor.obj a ⟶ (Tw hFinGat).functor.obj FinGat.cod) :
@@ -134,11 +144,13 @@ lemma Qd_map (h : (Tw hFinGat).functor.obj a ⟶ (Tw hFinGat).functor.obj FinGat
 
 variable [LocallySmall.{w} FinGat.carrier]
 
-/-- **Faithfulness at `X`**: `B` is read off from `T B` in the model `M_Ω`. -/
+/-- **Faithfulness at `X`**: `B` is read off from `T B` in the model `M_Ω`.
+
+[Paper, App. C.1, Cor. `cor:two-sortification-faithful`], at `X`. -/
 theorem twoSort_faithful_cod {B₁ B₂ : a ⟶ FinGat.cod}
     (e : (Tw hFinGat).functor.map B₁ = (Tw hFinGat).functor.map B₂) : B₁ = B₂ := by
-  have h1 := isoX_NM (GT hFinGat) (Zm a) hFinGat B₁
-  have h2 := isoX_NM (GT hFinGat) (Zm a) hFinGat B₂
+  have h1 := isoX_MOmega (GT hFinGat) (Zm a) hFinGat B₁
+  have h2 := isoX_MOmega (GT hFinGat) (Zm a) hFinGat B₂
   have : tmElt (a := a) B₁ = tmElt B₂ := by
     rw [← h1, ← h2]
     change Rd _ ((Tw hFinGat).functor.map B₁) = Rd _ ((Tw hFinGat).functor.map B₂)
@@ -146,23 +158,25 @@ theorem twoSort_faithful_cod {B₁ B₂ : a ⟶ FinGat.cod}
   exact (equivShrink _).injective (eq_of_heq (Sigma.mk.inj this).2)
 
 /-- **Fullness at `X`**: every `h : T a ⟶ T X` is `T B` for the sort `B` read off from `h` in
-`M_Ω`. -/
+`M_Ω`.
+
+[Paper, App. C.2, Prop. `prop:section-terms-two-sortification`], at `X`. -/
 theorem twoSort_full_cod (h : (Tw hFinGat).functor.obj a ⟶ (Tw hFinGat).functor.obj FinGat.cod) :
     ∃ B : a ⟶ FinGat.cod, (Tw hFinGat).functor.map B = h := by
   let Z := Zm (hFinGat := hFinGat) a
-  let N := NM (GT hFinGat) Z hFinGat
+  let N := MOmega (GT hFinGat) Z hFinGat
   let i : Z ⟶ N := (isInitialZero (Mf hFinGat) hFinGat).to N
   let j := jHom (GT hFinGat) Z hFinGat
   have hij : i ≫ j = 𝟙 Z := (isInitialZero (Mf hFinGat) hFinGat).hom_ext _ _
-  have hfam : (famF (GT hFinGat) a).map i ≫ eqToHom (famF_NM (GT hFinGat) Z hFinGat) ≫
+  have hfam : (famF (GT hFinGat) a).map i ≫ eqToHom (famF_MOmega (GT hFinGat) Z hFinGat) ≫
       psiF (GT hFinGat) Z = 𝟙 _ := by
     rw [← famF_jHom, ← Functor.map_comp, hij, CategoryTheory.Functor.map_id]
   let x : ((famF (GT hFinGat) a).obj Z).I := cast (congrArg FormalCoproduct.I (Rd_fst Z h)) (Rd Z h).2
   have hx : x ≍ (Rd Z h).2 := cast_heq _ _
   have step1 : ((famF (GT hFinGat) a).map i).f x ≍ (Rd N h).2 := Rd_map h i hx
   let b : Shrink.{w} (a ⟶ FinGat.cod) :=
-    cast (congrArg FormalCoproduct.I ((Rd_fst N h).trans (famF_NM (GT hFinGat) Z hFinGat))) (Rd N h).2
-  have step2 : (eqToHom (famF_NM (GT hFinGat) Z hFinGat)).f (((famF (GT hFinGat) a).map i).f x) = b := by
+    cast (congrArg FormalCoproduct.I ((Rd_fst N h).trans (famF_MOmega (GT hFinGat) Z hFinGat))) (Rd N h).2
+  have step2 : (eqToHom (famF_MOmega (GT hFinGat) Z hFinGat)).f (((famF (GT hFinGat) a).map i).f x) = b := by
     refine eq_of_heq ?_
     rw [fc_eqToHom_f]
     exact ((cast_heq _ _).trans step1).trans (cast_heq _ _).symm
@@ -182,15 +196,17 @@ theorem twoSort_full_cod (h : (Tw hFinGat).functor.obj a ⟶ (Tw hFinGat).functo
 theorem twoSortBij_cod : TwoSortBij.{w + 1, w + 2} hFinGat FinGat.cod := fun _ =>
   ⟨fun _ _ e => twoSort_faithful_cod e, fun h => twoSort_full_cod h⟩
 
-/-- **Faithfulness at `Y`**: `t` is read off from `T t` in the model `M_Ω`. -/
+/-- **Faithfulness at `Y`**: `t` is read off from `T t` in the model `M_Ω`.
+
+[Paper, App. C.1, Cor. `cor:two-sortification-faithful`], at `Y`. -/
 theorem twoSort_faithful_dom {t₁ t₂ : a ⟶ FinGat.dom}
     (e : (Tw hFinGat).functor.map t₁ = (Tw hFinGat).functor.map t₂) : t₁ = t₂ := by
   have hB : t₁ ≫ FinGat.arr = t₂ ≫ FinGat.arr :=
     twoSort_faithful_cod (by rw [Functor.map_comp, Functor.map_comp, e])
-  have h1 := gY_NM (GT hFinGat) (Zm a) hFinGat t₁
-  have h2 := gY_NM (GT hFinGat) (Zm a) hFinGat t₂
-  have : Qd (NM (GT hFinGat) (Zm a) hFinGat) ((Tw hFinGat).functor.map t₁) =
-      Qd (NM (GT hFinGat) (Zm a) hFinGat) ((Tw hFinGat).functor.map t₂) := by rw [e]
+  have h1 := gY_MOmega (GT hFinGat) (Zm a) hFinGat t₁
+  have h2 := gY_MOmega (GT hFinGat) (Zm a) hFinGat t₂
+  have : Qd (MOmega (GT hFinGat) (Zm a) hFinGat) ((Tw hFinGat).functor.map t₁) =
+      Qd (MOmega (GT hFinGat) (Zm a) hFinGat) ((Tw hFinGat).functor.map t₂) := by rw [e]
   change (gY (GT hFinGat)).obj ((Gm (GT hFinGat) t₁).obj _) =
     (gY (GT hFinGat)).obj ((Gm (GT hFinGat) t₂).obj _) at this
   rw [h1, h2] at this
@@ -202,15 +218,17 @@ lemma psiF_φ_congr (K : GL (GT hFinGat) a) {i₁ i₂ : Shrink.{w} (a ⟶ FinGa
   subst hi; cases huv; rfl
 
 /-- **Fullness at `Y`**: every `h : T a ⟶ T Y` is `T t` for the term `t` read off from `h` in
-`M_Ω`. -/
+`M_Ω`.
+
+[Paper, App. C.2, Prop. `prop:section-terms-two-sortification`], at `Y`. -/
 theorem twoSort_full_dom (h : (Tw hFinGat).functor.obj a ⟶ (Tw hFinGat).functor.obj FinGat.dom) :
     ∃ t : a ⟶ FinGat.dom, (Tw hFinGat).functor.map t = h := by
   obtain ⟨B, hB⟩ := twoSort_full_cod (h ≫ (Tw hFinGat).functor.map FinGat.arr)
   let Z := Zm (hFinGat := hFinGat) a
-  let N := NM (GT hFinGat) Z hFinGat
+  let N := MOmega (GT hFinGat) Z hFinGat
   let i : Z ⟶ N := (isInitialZero (Mf hFinGat) hFinGat).to N
   let j := jHom (GT hFinGat) Z hFinGat
-  have E := famF_NM (GT hFinGat) Z hFinGat
+  have E := famF_MOmega (GT hFinGat) Z hFinGat
   have hij : i ≫ j = 𝟙 Z := (isInitialZero (Mf hFinGat) hFinGat).hom_ext _ _
   have hfam : (famF (GT hFinGat) a).map i ≫ eqToHom E ≫ psiF (GT hFinGat) Z = 𝟙 _ := by
     rw [← famF_jHom, ← Functor.map_comp, hij, CategoryTheory.Functor.map_id]
@@ -226,7 +244,7 @@ theorem twoSort_full_dom (h : (Tw hFinGat).functor.obj a ⟶ (Tw hFinGat).functo
   have hRN : Rd N hp = tmElt B := by
     change Rd N (h ≫ (Tw hFinGat).functor.map FinGat.arr) = tmElt B
     rw [← hB]
-    exact isoX_NM (GT hFinGat) Z hFinGat B
+    exact isoX_MOmega (GT hFinGat) Z hFinGat B
   have hi0 : (eqToHom E).f (((famF (GT hFinGat) a).map i).f x) = shX a B := by
     refine eq_of_heq ?_
     rw [fc_eqToHom_f]
@@ -268,11 +286,13 @@ section Main
 
 open TwoSortFF
 
-variable {FinGat : ExpArrCat.{w + 1, w + 2}} [LocallySmall.{w} FinGat.carrier]
+variable {FinGat : Lexp.{w + 1, w + 2}} [LocallySmall.{w} FinGat.carrier]
   (hFinGat : IsBiInitial FinGat)
 
 /-- The two-sortification functor induces bijections on all hom-sets: the induction of
-Proposition "faithful-at-XGAT-YGAT" from the base cases `X` and `Y`. -/
+Proposition "faithful-at-XGAT-YGAT" from the base cases `X` and `Y`.
+
+[Paper, App. C, Prop. `prop:faithful-at-XGAT-YGAT`]. -/
 theorem twoSortBij_all (b : FinGat.carrier) : TwoSortBij.{w + 1, w + 2} hFinGat b :=
   hFinGat.induction
     { of_iso := fun i hb => twoSortBij_of_iso hFinGat i hb
@@ -282,19 +302,25 @@ theorem twoSortBij_all (b : FinGat.carrier) : TwoSortBij.{w + 1, w + 2} hFinGat 
       dom := TwoSortFF.twoSortBij_dom
       cod := TwoSortFF.twoSortBij_cod } b
 
-/-- **The two-sortification functor is full.** -/
+/-- **The two-sortification functor is full.**
+
+[Paper, App. C.2, final Corollary]. -/
 instance twoSortification_full : (twoSortification.{w + 1, w + 2} hFinGat).functor.Full :=
   ⟨fun {a b} f => (twoSortBij_all hFinGat b a).2 f⟩
 
-/-- **The two-sortification functor is faithful.** -/
+/-- **The two-sortification functor is faithful.**
+
+[Paper, App. C.1, Cor. `cor:two-sortification-faithful`]. -/
 instance twoSortification_faithful : (twoSortification.{w + 1, w + 2} hFinGat).functor.Faithful :=
   ⟨fun {a b} _ _ h => (twoSortBij_all hFinGat b a).1 h⟩
 
-/-- **The two-sortification functor is fully faithful.** -/
+/-- **The two-sortification functor is fully faithful.**
+
+[Paper, App. C.2, final Corollary]: `T` is fully faithful. -/
 noncomputable def twoSortificationFullyFaithful :
     (twoSortification.{w + 1, w + 2} hFinGat).functor.FullyFaithful :=
   Functor.FullyFaithful.ofFullyFaithful _
 
 end Main
 
-end ExpArrCat
+end Lexp

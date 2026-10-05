@@ -1,8 +1,13 @@
 import CartexpAristotle.SliceFunctor
-import CartexpAristotle.ExpArrCat
+import CartexpAristotle.Lexp
 
 /-!
-# The comparison `F (P X_A) ≅ P X_B` for a morphism of `ExpArrCat`
+# The comparison `F (P X_A) ≅ P X_B` for a morphism of `Lexp`
+
+## References
+
+* [Paper, §4.2, Prop. `prop:lexp-functor-p2`]: the isomorphism `F(P_p X) ≅ P_{p'} X'` used to
+  define the image of a `Lexp`-functor by the endofunctor `- / PX` (`Lexp.θ`).
 -/
 
 open CategoryTheory Limits
@@ -50,14 +55,14 @@ lemma canonical_mor'_id {c : C} (d : Data u c) [Universal d] : canonical_mor' (�
 
 end Generic
 
-namespace ExpArrCat
+namespace Lexp
 
-variable {A B : ExpArrCat.{v, u}} (F : A ⟶ B)
+variable {A B : Lexp.{v, u}} (F : A ⟶ B)
 
 /-- The chosen universal `Data` of the arrow of `A` at its codomain. -/
-noncomputable abbrev dX (A : ExpArrCat.{v, u}) : Data A.arr A.cod := SliceExp.sX A.arr
+noncomputable abbrev dX (A : Lexp.{v, u}) : Data A.arr A.cod := SliceExp.sX A.arr
 
-noncomputable instance dX_univ (A : ExpArrCat.{v, u}) : Universal (dX A) :=
+noncomputable instance dX_univ (A : Lexp.{v, u}) : Universal (dX A) :=
   IsExpArr.isExpArrow A.cod
 
 /-- The image under `F` of `dX A`, transported along `F.iso` to an `Data` for `B.arr`. -/
@@ -69,7 +74,9 @@ noncomputable instance Eθ_univ : Universal (Eθ F) := by
     FunctorPreserves.functor_preserves (u := A.arr) (F := F.functor) (dX A) inferInstance
   exact lift_arrow_iso_univ F.iso _
 
-/-- The comparison `F (P X_A) ⟶ P X_B`. -/
+/-- The comparison `F (P X_A) ⟶ P X_B`.
+
+[Paper, §4.2, Prop. `prop:lexp-functor-p2`]: the comparison `F P_p X ≅ P_{p'} X'`. -/
 noncomputable def θ : F.functor.obj (SliceExp.sZ A.arr) ⟶ SliceExp.sZ B.arr :=
   canonical_mor' F.iso.hom.right (dX B) (Eθ F)
 
@@ -91,4 +98,4 @@ noncomputable instance θ_isIso : IsIso (θ F) :=
     (canonical_mor'_comp F.iso.inv.right F.iso.hom.right (dX B) (Eθ F) (dX B)).trans (by
       rw [right_inv_hom F.iso]; exact canonical_mor'_id _)⟩
 
-end ExpArrCat
+end Lexp

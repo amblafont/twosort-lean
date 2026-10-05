@@ -1,23 +1,29 @@
-import CartexpAristotle.FamSliceAdjunction
-import CartexpAristotle.FamPointedForget
+import CartexpAristotle.ColaxSliceCartAdjunction
+import CartexpAristotle.ColaxSliceCartExponentiable
 import CartexpAristotle.AdjointExp
 
 /-!
-# `FamSlice.toOver` preserves the exponentiable arrow `UFam`
+# `ColaxSliceCart.toOver` preserves the exponentiable arrow `UFam`
 
 We check the Frobenius condition for the adjunction `ofOver ⊣ toOver` and the arrow `UFam`:
 the pullback in `Over (Cat.of Fam)` of `toOver.map UFam` along `f : d ⟶ toOver.obj SetObj` is the
 category of elements of `x ↦ (f x).obj`, and its image under `ofOver` is exactly the chosen
-pullback `pbChosen` of `UFam` in `FamSlice`.
+pullback `pbChosen` of `UFam` in `ColaxSliceCart`.
+
+## References
+
+* [Paper, App. A.4, proof of Prop. `prop:semantic-twosort-functor`], last condition: "the
+  naturality square of the counit for the exponentiable morphism is a pullback", here phrased as
+  a Frobenius condition for the adjunction `ofOver ⊣ toOver` (`frobenius_UFam`).
 -/
 
 universe w
 
-open CategoryTheory Limits FamSlice FamPointedForget PointedForget
+open CategoryTheory Limits ColaxSliceCart ColaxSliceCartExponentiable PointedForget
 
-namespace FamOverFrobenius
+namespace SemanticTwoSortFrobenius
 
-lemma heq_right_of_heq {X : FamSlice.{w, w, w + 1}} {a a' b b' : CartComma X} (ha : a = a')
+lemma heq_right_of_heq {X : ColaxSliceCart.{w, w, w + 1}} {a a' b b' : CartComma X} (ha : a = a')
     (hb : b = b') {φ : a ⟶ b} {ψ : a' ⟶ b'} (h : HEq φ ψ) :
     HEq (φ : CartComma.Hom a b).right (ψ : CartComma.Hom a' b').right := by
   subst ha hb
@@ -144,7 +150,9 @@ lemma K0_frob : IsPullback ((ofOverAdj.homEquiv _ _).symm (K0 f).p₁) (ofOver.m
   rw [K0_fst, K0_snd]
   exact (pbChosen ((ofOverAdj.homEquiv _ _).symm f)).isPullback
 
-/-- The Frobenius condition for `ofOver ⊣ toOver` and `UFam`. -/
+/-- The Frobenius condition for `ofOver ⊣ toOver` and `UFam`.
+
+[Paper, App. A.4, proof of Prop. `prop:semantic-twosort-functor`]. -/
 lemma frobenius_UFam : Frobenius ofOverAdj.{w} UFam.{w} :=
   Frobenius.of_chosen (fun f => K0 f) (fun f => K0_frob f)
 
@@ -152,4 +160,4 @@ lemma frobenius_UFam : Frobenius ofOverAdj.{w} UFam.{w} :=
 noncomputable instance toOver_preserves_UFam : FunctorPreserves UFam.{w} toOver.{w} :=
   functorPreserves_of_adjunction frobenius_UFam
 
-end FamOverFrobenius
+end SemanticTwoSortFrobenius

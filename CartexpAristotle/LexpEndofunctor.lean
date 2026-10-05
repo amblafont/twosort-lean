@@ -1,4 +1,18 @@
-import CartexpAristotle.ExpArrTheta
+import CartexpAristotle.LexpTheta
+
+/-!
+# The endofunctor `- / PX` of `Lexp`
+
+`Lexp.Φ` sends a `Lexp`-category `(C, p : Y ⟶ X)` to `(C / P X, p̲ : Y̲ ⟶ X̲)`, where `p̲` is the
+pullback of `p` along the counit `ε_X : X̲ = Y ×_X P X ⟶ X`, and a `Lexp`-functor `F` to
+`Z ↦ (F Z ⟶ F (P X) ≅ P X')`.
+
+## References
+
+* [Paper, §4.2, Prop. `prop:lexp-functor-p2`]: `Lexp.Φ` is the endofunctor `MFunctor{-}`
+  (written `- / PX` in the paper) of `Lexp`.
+* [Paper, §3.1, Props. `prop:p2-construction` and `prop:p2-exponentiable`]: `Lexp.Φobj`.
+-/
 
 open CategoryTheory Limits
 
@@ -31,9 +45,9 @@ lemma over_functor_ext {H K : Over Z ⥤ Over Z'}
 
 end OverExt
 
-namespace ExpArrCat
+namespace Lexp
 
-variable {A B : ExpArrCat.{v, u}} (F : A ⟶ B)
+variable {A B : Lexp.{v, u}} (F : A ⟶ B)
 
 /-- The left component of `F.iso`. -/
 noncomputable def isoL : F.functor.obj A.dom ≅ B.dom := Arrow.leftFunc.mapIso F.iso
@@ -99,7 +113,7 @@ lemma θ_unique (θ' : F.functor.obj (SliceExp.sZ A.arr) ⟶ SliceExp.sZ B.arr)
     θ' = θ F :=
   mor_unique (d1 := dX B) ((Eθ F).epsilon ≫ F.iso.hom.right) θ' h h2
 
-lemma θ_id (A : ExpArrCat.{v, u}) : θ (𝟙 A) = 𝟙 _ := by
+lemma θ_id (A : Lexp.{v, u}) : θ (𝟙 A) = 𝟙 _ := by
   have h : (Eθ (𝟙 A)).pi = 𝟙 _ ≫ (dX A).pi := by
     change (dX A).pi ≫ 𝟙 _ = 𝟙 _ ≫ (dX A).pi
     simp
@@ -116,7 +130,7 @@ lemma θ_id (A : ExpArrCat.{v, u}) : θ (𝟙 A) = 𝟙 _ := by
   change (dX A).epsilon ≫ 𝟙 _ = 𝟙 _ ≫ (dX A).epsilon
   simp
 
-variable {C' : ExpArrCat.{v, u}} (G : B ⟶ C')
+variable {C' : Lexp.{v, u}} (G : B ⟶ C')
 
 lemma FBF_Eθ_comp (h : (Eθ (F ≫ G)).pi = (G.functor.map (θ F) ≫ θ G) ≫ (dX C').pi) :
     FBF_on_mor (dX C') (Eθ (F ≫ G)).Pbk h = G.functor.map (ιX F).hom ≫ (ιX G).hom := by
@@ -145,7 +159,7 @@ lemma θ_comp : θ (F ≫ G) = G.functor.map (θ F) ≫ θ G := by
   rw [Category.assoc, ← ιX_eps G, ← Category.assoc (G.functor.map (ιX F).hom),
     ← G.functor.map_comp, ← ιX_eps F, G.functor.map_comp, Category.assoc]
 
-lemma ιX_id (A : ExpArrCat.{v, u}) : (ιX (𝟙 A)).hom = 𝟙 _ := by
+lemma ιX_id (A : Lexp.{v, u}) : (ιX (𝟙 A)).hom = 𝟙 _ := by
   apply (dX A).Pbk.hom_ext
   · refine (ιX_fst (𝟙 A)).trans ?_
     change (dX A).Pbk.p₁ ≫ 𝟙 _ = 𝟙 _ ≫ (dX A).Pbk.p₁
@@ -169,7 +183,7 @@ lemma ιX_comp : (ιX (F ≫ G)).hom = G.functor.map (ιX F).hom ≫ (ιX G).hom
       ← G.functor.map_comp, ιX_snd F, G.functor.map_comp, Category.assoc]
 
 open SliceExp in
-lemma ιY_id (A : ExpArrCat.{v, u}) : (ιY (𝟙 A)).hom = 𝟙 _ := by
+lemma ιY_id (A : Lexp.{v, u}) : (ιY (𝟙 A)).hom = 𝟙 _ := by
   apply (shpb A.arr).hom_ext
   · refine (ιY_fst (𝟙 A)).trans ?_
     change pullback.fst A.arr (sE A.arr) ≫ 𝟙 _ = 𝟙 _ ≫ pullback.fst A.arr (sE A.arr)
@@ -194,19 +208,21 @@ lemma ιY_comp : (ιY (F ≫ G)).hom = G.functor.map (ιY F).hom ≫ (ιY G).hom
     rw [ιX_comp, Category.assoc, ιY_snd G, ← Category.assoc (G.functor.map (ιY F).hom),
       ← G.functor.map_comp, ιY_snd F, G.functor.map_comp, Category.assoc]
 
-end ExpArrCat
+end Lexp
 
-namespace ExpArrCat
+namespace Lexp
 
 open SliceExp
 
 /-- The object part of the endofunctor: `(C, p : Y ⟶ X)` is sent to `C / P X` with the pullback
-of `p` along the counit `Y ×_X P X ⟶ X`. -/
-noncomputable def Φobj (A : ExpArrCat.{v, max u v}) : ExpArrCat.{v, max u v} where
+of `p` along the counit `Y ×_X P X ⟶ X`.
+
+[Paper, §3.1, Prop. `prop:p2-exponentiable`]: the `Lexp`-category `(C / P X, p̲)`. -/
+noncomputable def Φobj (A : Lexp.{v, max u v}) : Lexp.{v, max u v} where
   carrier := Over (sZ A.arr)
   arr := sArr A.arr
 
-variable {A B : ExpArrCat.{v, max u v}} (F : A ⟶ B)
+variable {A B : Lexp.{v, max u v}} (F : A ⟶ B)
 
 /-- The underlying functor of `Φ F`. -/
 noncomputable abbrev Φfun : Over (sZ A.arr) ⥤ Over (sZ B.arr) := sliceMap F.functor A.arr (θ F)
@@ -248,7 +264,7 @@ noncomputable def Φmap : Φobj A ⟶ Φobj B where
   preservesArr := sliceFunctorPreserves F.functor A.arr (θ F)
   iso := Φiso F
 
-lemma Φfun_id (A : ExpArrCat.{v, max u v}) : Φfun (𝟙 A) = 𝟭 _ :=
+lemma Φfun_id (A : Lexp.{v, max u v}) : Φfun (𝟙 A) = 𝟭 _ :=
   over_functor_ext (H := Φfun (𝟙 A)) (K := 𝟭 _) (fun _ => rfl)
     (fun c => by
       change c.hom ≫ θ (𝟙 A) = 𝟙 _ ≫ c.hom
@@ -258,7 +274,7 @@ lemma Φfun_id (A : ExpArrCat.{v, max u v}) : Φfun (𝟙 A) = 𝟭 _ :=
       change f.left = 𝟙 _ ≫ f.left ≫ 𝟙 _
       simp)
 
-lemma Φfun_comp {A B C' : ExpArrCat.{v, max u v}} (F : A ⟶ B) (G : B ⟶ C') :
+lemma Φfun_comp {A B C' : Lexp.{v, max u v}} (F : A ⟶ B) (G : B ⟶ C') :
     (Φfun (F ≫ G) : Over (sZ A.arr) ⥤ Over (sZ C'.arr)) = Φfun F ⋙ Φfun G :=
   by
   refine over_functor_ext (fun _ => rfl) (fun c => ?_) (fun f => ?_)
@@ -269,7 +285,7 @@ lemma Φfun_comp {A B C' : ExpArrCat.{v, max u v}} (F : A ⟶ B) (G : B ⟶ C') 
       𝟙 _ ≫ G.functor.map (F.functor.map f.left) ≫ 𝟙 _
     simp
 
-lemma Φmap_id (A : ExpArrCat.{v, max u v}) : Φmap (𝟙 A) = 𝟙 (Φobj A) :=
+lemma Φmap_id (A : Lexp.{v, max u v}) : Φmap (𝟙 A) = 𝟙 (Φobj A) :=
   Hom.ext' (Φfun_id A)
     (Over.OverMorphism.ext (by
       erw [Over.comp_left, Over.eqToHom_left]
@@ -280,7 +296,7 @@ lemma Φmap_id (A : ExpArrCat.{v, max u v}) : Φmap (𝟙 A) = 𝟙 (Φobj A) :=
       change (ιX (𝟙 A)).hom = 𝟙 _ ≫ 𝟙 _
       rw [ιX_id]; simp))
 
-lemma Φmap_comp {A B C' : ExpArrCat.{v, max u v}} (F : A ⟶ B) (G : B ⟶ C') :
+lemma Φmap_comp {A B C' : Lexp.{v, max u v}} (F : A ⟶ B) (G : B ⟶ C') :
     Φmap (F ≫ G) = Φmap F ≫ Φmap G :=
   Hom.ext' (Φfun_comp F G)
     (Over.OverMorphism.ext (by
@@ -292,12 +308,14 @@ lemma Φmap_comp {A B C' : ExpArrCat.{v, max u v}} (F : A ⟶ B) (G : B ⟶ C') 
       change (ιX (F ≫ G)).hom = 𝟙 _ ≫ (G.functor.map (ιX F).hom ≫ (ιX G).hom)
       rw [ιX_comp, Category.id_comp]))
 
-/-- The endofunctor of `ExpArrCat` sending `(C, p : Y ⟶ X)` to `(C / P X, p')`, where `p'` is the
-pullback of `p` along the counit `Y ×_X P X ⟶ X`. -/
-noncomputable def Φ : ExpArrCat.{v, max u v} ⥤ ExpArrCat.{v, max u v} where
+/-- The endofunctor of `Lexp` sending `(C, p : Y ⟶ X)` to `(C / P X, p')`, where `p'` is the
+pullback of `p` along the counit `Y ×_X P X ⟶ X`.
+
+[Paper, §4.2, Prop. `prop:lexp-functor-p2`]: the endofunctor `- / PX` of `Lexp`. -/
+noncomputable def Φ : Lexp.{v, max u v} ⥤ Lexp.{v, max u v} where
   obj := Φobj
   map := Φmap
   map_id := Φmap_id
   map_comp := Φmap_comp
 
-end ExpArrCat
+end Lexp

@@ -1,7 +1,7 @@
 # How the Lean proof of initial models differs from the appendix
 
 This note compares the Lean proof that every theory has an initial model
-(`modelFunctor_hasInitial` in `CartexpAristotle/ModelInitial.lean`, which uses the general result
+(`modelFunctor_hasInitial` in `CartexpAristotle/InitialModelGat.lean`, which uses the general result
 `InitialModel.isInitialZero` in `CartexpAristotle/InitialModelUnique.lean`) with the proof in the
 appendix section "Initial Models of GATs" (`s-appendices_csl.tex`).
 
@@ -12,7 +12,7 @@ appendix section "Initial Models of GATs" (`s-appendices_csl.tex`).
 | Candidate model \(0_Ω\) | Use Thm. *universal-property-natural-transformation* to get a nat. trans. \(\hom(Ω,-) ⇒ \mathcal M\), then evaluate at \(\mathrm{id}_Ω\) (Yoneda) | The same idea (`alpha`, `zero` in `InitialModel.lean`) |
 | Existence of \(0_Ω → ω\) | Nat. trans. into \(\mathrm{cod}_- ∘ \mathcal M : \FinGat → \CAT^→\), with a new \(\Lexp\)-structure on \(\CAT^→\) (Prop. *arrow-functor-lexp*) | Nat. trans. **out of a collage** into \(\mathcal M\) itself, with \(\CAT\)'s usual structure (`gamma`, `toModel` in `InitialModelMorphisms.lean`) |
 | Uniqueness | "Any morphism satisfies the condition of Prop. *initial-model-gat-morphism-existence*", plus the Yoneda correspondence | Every `g : zero ⟶ ω` is turned into a nat. trans. `gammaOf g` out of the collage. Its square at `p` is the same one, so `gammaOf g = gamma`. Then `g` is read back from it (`InitialModelUnique.lean`) |
-| Scope | The model functor | Any \(\Lexp\)-morphism `G : A ⟶ CatExp` out of a bi-initial `A` |
+| Scope | The model functor | Any \(\Lexp\)-morphism `G : A ⟶ CatLexp` out of a bi-initial `A` |
 | Size | Not discussed | Assumes `LocallySmall.{w}` so that the term sets \(\mathrm{Tm}(B)\) live in `Type w` |
 
 ## 1. The candidate model: same idea, more details checked
@@ -71,7 +71,7 @@ pushforwards in \(\CAT^→\) (the categories \(\mathbf{Set}/\mathrm{Fam}(C)\)) a
 * Bi-initiality gives a unique `gamma ω : K ω ⟶ G`. Uniqueness then gives the two restriction
   facts: `gamma` is `alpha` on the `Disc` part (`gamma_restrict₁`) and the identity on the `G`
   part (`gamma_restrict₂`).
-* The morphism `toModel : zero ⟶ ω` is the image under `gamma_a` of the canonical cross morphism
+* The morphism `toModel : zero ⟶ ω` is the image under the component `(gamma ω).app a` of the canonical cross morphism
   `inl (𝟙 a) ⟶ inr ω` (`crossHom`). By the two restriction facts, that image goes from `zero` to
   `ω`.
 
@@ -105,11 +105,11 @@ collage, not from a separate Yoneda argument.
 
 ## 4. Other differences
 
-* **Generality.** `isInitialZero` holds for any \(\Lexp\)-morphism `G : A ⟶ CatExp` out of a
+* **Generality.** `isInitialZero` holds for any \(\Lexp\)-morphism `G : A ⟶ CatLexp` out of a
   bi-initial `A` with small hom-sets. It is not limited to the model functor. The model functor
   is fixed only up to isomorphism by a noncomputable choice, so the general statement is the
   natural one.
-* **Abandoned induction.** An earlier `ModelInitial.lean` tried an induction over the objects of
+* **Abandoned induction.** An earlier `InitialModelGat.lean` tried an induction over the objects of
   `FinGat`. Its pullback step does not follow from its hypotheses, since a pullback of categories
   with initial objects need not have one. That step is commented out in the file with an
   explanation, and the direct construction above replaces it.

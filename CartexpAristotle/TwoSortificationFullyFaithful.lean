@@ -9,10 +9,10 @@ import CartexpAristotle.BiInitialInduction
 /-!
 # Full faithfulness of the two-sortification functor
 
-Let `FinGat` be a bi-initial object of `ExpArrCat`, with chosen exponentiable arrow `p : Y ⟶ X`,
+Let `FinGat` be a bi-initial object of `Lexp`, with chosen exponentiable arrow `p : Y ⟶ X`,
 and let `T : FinGat ⥤ Φ FinGat = FinGat / P X` be the underlying functor of the two-sortification
 functor. We show that `T` is fully faithful, by induction over the objects of `FinGat`
-(`ExpArrCat.IsBiInitial.induction`) applied to the property of an object `b`
+(`Lexp.IsBiInitial.induction`) applied to the property of an object `b`
 
   "for every object `a`, the map `(a ⟶ b) → (T a ⟶ T b)` induced by `T` is bijective".
 
@@ -23,6 +23,12 @@ Proposition "faithful-at-XGAT-YGAT" of the appendix.
 
 The two base cases `b = Y` and `b = X`, and the resulting full faithfulness of `T`, are proved in
 `CartexpAristotle.TwoSortFFMain` following the appendix.
+
+## References
+
+* [Paper, App. C, Prop. `prop:faithful-at-XGAT-YGAT`]: full faithfulness of a `Lexp`-functor
+  out of `FinGat` reduces to full faithfulness at `X` and `Y` (`TwoSortBij`, closure lemmas
+  `twoSortBij_of_iso`, `twoSortBij_terminal`, `twoSortBij_pullback`, `twoSortBij_exp`).
 -/
 
 open CategoryTheory Limits
@@ -47,15 +53,17 @@ lemma map_FBF_on_mor (F : C ⥤ D) [PreservesLimitsOfShape WalkingCospan F] {X Y
 
 end FBF
 
-namespace ExpArrCat
+namespace Lexp
 
-variable {FinGat : ExpArrCat.{v, max u v}} (hFinGat : IsBiInitial FinGat)
+variable {FinGat : Lexp.{v, max u v}} (hFinGat : IsBiInitial FinGat)
 
 /-- The underlying functor `FinGat ⥤ FinGat / P X` of the two-sortification functor. -/
 noncomputable abbrev twoSortFun := (twoSortification hFinGat).functor
 
 /-- The property of an object `b` that, for every object `a`, the two-sortification functor
-induces a bijection `(a ⟶ b) → (T a ⟶ T b)`. -/
+induces a bijection `(a ⟶ b) → (T a ⟶ T b)`.
+
+[Paper, App. C, Prop. `prop:faithful-at-XGAT-YGAT`]: `T` is fully faithful at `b`. -/
 def TwoSortBij (b : FinGat.carrier) : Prop :=
   ∀ a : FinGat.carrier, Function.Bijective (fun g : a ⟶ b => (twoSortFun hFinGat).map g)
 
@@ -146,4 +154,4 @@ lemma twoSortBij_exp (c : FinGat.carrier) (hX : TwoSortBij hFinGat FinGat.cod)
     rw [← map_FBF_on_mor (twoSortFun hFinGat) d K hs, ← CategoryTheory.Functor.map_comp,
       ← Universal.comm (data := d) (Kuf := K) g, hg]
 
-end ExpArrCat
+end Lexp

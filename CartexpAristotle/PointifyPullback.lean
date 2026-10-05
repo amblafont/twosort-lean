@@ -3,7 +3,7 @@ Copyright (c) 2026 Lean Contributor. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Lean Contributor
 -/
-import CartexpAristotle.PointedForget
+import CartexpAristotle.CatExponentiable
 import CartexpAristotle.CatPullbackCriterion
 
 /-!
@@ -23,6 +23,13 @@ is a pullback in `Cat` if and only if
 * for every `x : X` and `z : g x`, there is a unique `w` with `snd w = x` and `s w = z`, and
 * for all `w`, `w'` and `h : snd w ⟶ snd w'` with `g h (s w) = s w'`, there is a unique
   `k : w ⟶ w'` with `snd k = h`.
+
+## References
+
+* Auxiliary, not in the paper. It describes the naturality squares at `p` of the natural
+  transformations into the model functor built in [Paper, App. B, Prop.
+  `prop:initial-model-gat-existence`], which must be pullbacks for
+  [Paper, Thm. `thm:universal-property-natural-transformation`] to apply.
 -/
 
 open CategoryTheory Limits

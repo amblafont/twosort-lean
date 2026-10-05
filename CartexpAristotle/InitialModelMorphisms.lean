@@ -13,17 +13,24 @@ transformation `beta ω : Disc (a ⟶ -) ⟶ G`, `σ ↦ G σ ω`, and we consid
 `K ω = Collage.functor (beta ω)`. A natural transformation `K ω ⟶ G` restricting to the term model
 on `Disc (a ⟶ -)` and to the identity on `G` amounts to a morphism `zero ⟶ ω`. Such natural
 transformations are unique by bi-initiality, which shows that `zero` is initial.
+
+## References
+
+* [Paper, App. B, Prop. `prop:initial-model-gat-morphism-existence`]: the morphism
+  `toModel : 0_Ω ⟶ ω` (the morphism `i` of the paper). The paper obtains it from a natural
+  transformation into `cod_- ∘ M` ([Paper, App. B, Prop. `prop:arrow-functor-lexp`]); here
+  it comes from a natural transformation out of a collage instead.
 -/
 
 open CategoryTheory Limits
 
 universe w
 
-namespace ExpArrCat
+namespace Lexp
 
 namespace InitialModel
 
-open FamOverExpArr PointedForget
+open SemanticTwoSortFunctor PointedForget
 
 noncomputable section
 
@@ -36,8 +43,8 @@ lemma functor_map_heq {C : Type*} [Category C] (F : C ⥤ Type w) {x x' y y' : C
     (hz : z ≍ z') : F.map f z ≍ F.map f' z' := by
   subst hx hy; cases hf; cases hz; rfl
 
-variable {A : ExpArrCat.{w + 1, w + 2}} [LocallySmall.{w} A.carrier] {a : A.carrier}
-  (G : A ⟶ CatExp.{w})
+variable {A : Lexp.{w + 1, w + 2}} [LocallySmall.{w} A.carrier] {a : A.carrier}
+  (G : A ⟶ CatLexp.{w})
 
 /-- The category of models of `a`. -/
 abbrev Mod (a : A.carrier) : Cat.{w, w + 1} := G.functor.obj a
@@ -127,7 +134,7 @@ abbrev f1Left : (K G ω).obj A.dom ⟶ Cat.of Pointed.{w} :=
   pointifyHom ((K G ω).map A.arr) (f1Right G ω) (sec G ω) (fun f => sec_map G ω f)
 
 /-- The square at `p` for the collage. -/
-def f1 : Arrow.mk ((K G ω).map A.arr) ⟶ Arrow.mk CatExp.{w}.arr :=
+def f1 : Arrow.mk ((K G ω).map A.arr) ⟶ Arrow.mk CatLexp.{w}.arr :=
   Arrow.homMk (f1Left G ω) (f1Right G ω) (pointifyHom_comm _ _ _ _)
 
 lemma f1_crit : PointifyCrit ((K G ω).map A.arr) (f1Right G ω) (sec G ω) := by
@@ -171,7 +178,7 @@ lemma f1_crit : PointifyCrit ((K G ω).map A.arr) (f1Right G ω) (sec G ω) := b
     · exact PEmpty.elim h
     · exact (critG G).hom e e' h hcond
 
-lemma hf1 : IsPullback (f1 G ω).left ((K G ω).map A.arr) CatExp.{w}.arr (f1 G ω).right :=
+lemma hf1 : IsPullback (f1 G ω).left ((K G ω).map A.arr) CatLexp.{w}.arr (f1 G ω).right :=
   isPullback_pointify _ (f1Right G ω) (sec G ω) (fun f => sec_map G ω f) (f1_crit G ω)
 
 lemma map_id_obj : (G.functor.map (𝟙 a)).toFunctor.obj ω = ω :=
@@ -236,7 +243,9 @@ lemma gamma_obj_inr (e : Mod G a) : ((gamma G hA ω).app a).toFunctor.obj (.inr 
   Functor.congr_obj (congrArg Cat.Hom.toFunctor
     (congrArg (fun T => NatTrans.app T a) (gamma_restrict₂ G hA ω))) e
 
-/-- **Existence** of a morphism from the initial model to `ω`. -/
+/-- **Existence** of a morphism from the initial model to `ω`.
+
+[Paper, App. B, Prop. `prop:initial-model-gat-morphism-existence`]: the morphism `i : 0_Ω ⟶ ω`. -/
 def toModel : zero G hA ⟶ ω :=
   eqToHom (gamma_obj_inl G hA ω (𝟙 a)).symm ≫ ((gamma G hA ω).app a).toFunctor.map (X := .inl (𝟙 a)) (Y := .inr ω) (crossHom G ω) ≫
     eqToHom (gamma_obj_inr G hA ω ω)
@@ -247,4 +256,4 @@ end
 
 end InitialModel
 
-end ExpArrCat
+end Lexp

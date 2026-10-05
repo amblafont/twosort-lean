@@ -14,17 +14,22 @@ and we construct a pullback square from `D G K p` to the chosen arrow of `C₀`:
 * at `X`, a sort `B : a ⟶ X` is sent to the family of terms `TmFam a` with the index `B`, and a
   model `e` of `X` is sent to its family with its index;
 * at `Y`, a term `t : a ⟶ Y` is sent to `TmFam a` with the index `t ≫ p` and the element `t`.
+
+## References
+
+* [Paper, App. C.1, proof of Prop. `prop:model-faithful`]: the pullback square at `p` needed to
+  apply [Paper, Thm. `thm:universal-property-natural-transformation`].
 -/
 
 open CategoryTheory Limits
 
 universe w
 
-namespace ExpArrCat
+namespace Lexp
 
 namespace TwoSortFF
 
-open FamOverExpArr PointedForget SliceExp
+open SemanticTwoSortFunctor PointedForget SliceExp
 
 noncomputable section
 
@@ -36,7 +41,7 @@ lemma fc_eqToHom_φ_heq {F F' : FormalCoproduct.{w} (Type w)} (h : F = F') (i : 
     (x : F.obj i) : (eqToHom h).φ i x ≍ x := by
   subst h; rfl
 
-variable {A : ExpArrCat.{w + 1, w + 2}} [LocallySmall.{w} A.carrier] (G : A ⟶ C₀.{w})
+variable {A : Lexp.{w + 1, w + 2}} [LocallySmall.{w} A.carrier] (G : A ⟶ C₀.{w})
   {a : A.carrier} (K : GL G a)
 
 instance preservesPullbacks_D : PreservesLimitsOfShape WalkingCospan (D G K) := by
@@ -237,4 +242,4 @@ end
 
 end TwoSortFF
 
-end ExpArrCat
+end Lexp

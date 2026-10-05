@@ -10,6 +10,11 @@ public import Mathlib.CategoryTheory.Limits.Shapes.Pullback.HasPullback
 The category `Cat.{v, u}` has all pullbacks: the pullback of `F : A ⥤ C` and `G : B ⥤ C` is the
 strict pullback category, whose objects are pairs `(a, b)` with `F a = G b` and whose morphisms
 are pairs of morphisms with the same image in `C`.
+
+## References
+
+* [Paper, §2.2, Prop. `prop:CAT`]: `CAT` is a Lex-category. This file provides the pullbacks;
+  the terminal object comes from Mathlib.
 -/
 
 @[expose] public section

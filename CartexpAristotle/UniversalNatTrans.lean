@@ -3,16 +3,26 @@ Copyright (c) 2026 Lean Contributor. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Lean Contributor
 -/
-import CartexpAristotle.CommaExpArr
+import CartexpAristotle.CommaLexp
 
 /-!
-# Maps out of a bi-initial `ExpArrCat`
+# Maps out of a bi-initial `Lexp`
 
-Let `FinGAT` be a bi-initial object of the 2-category `ExpArrCat`, with chosen exponentiable arrow
-`p : Y ⟶ X`.  Given an `ExpArrCat` `C`, a pullback-preserving functor `F : FinGAT ⥤ C`, an
-`ExpArrCat`-morphism `G : FinGAT ⟶ C` and a morphism `f : F p ⟶ G p` of arrows which forms a
+Let `FinGAT` be a bi-initial object of the 2-category `Lexp`, with chosen exponentiable arrow
+`p : Y ⟶ X`.  Given an `Lexp` `C`, a pullback-preserving functor `F : FinGAT ⥤ C`, an
+`Lexp`-morphism `G : FinGAT ⟶ C` and a morphism `f : F p ⟶ G p` of arrows which forms a
 pullback square, there is a unique natural transformation `F ⟶ G` restricting to `f`
-(`ExpArrCat.IsBiInitial.existsUnique_natTrans`).
+(`Lexp.IsBiInitial.existsUnique_natTrans`).
+
+## References
+
+* [Paper, §2.2, Thm. `thm:universal-property-natural-transformation`] and its proof in
+  [Paper, App. A.3]: `Lexp.IsBiInitial.existsUnique_natTrans` (and the variants
+  `existsUnique_natTrans_gen`, `existsUnique_natTrans_iso`). The proof goes through the
+  `Lexp`-structure on the comma category ([Paper, App. A.3, Prop. `prop:comma-lexp`],
+  `CartexpAristotle.CommaLexp`) and the universal property of comma categories.
+* [Paper, §2.2, Thm. `thm:uemura`] and the following paragraph: `Lexp.IsBiInitial` (bi-initiality:
+  a morphism into every object, and a unique invertible 2-cell between any two).
 -/
 
 open CategoryTheory Limits
@@ -84,7 +94,7 @@ lemma Universal.mor_congr {C : Type*} [Category C] {Y X c : C} {u : Y ⟶ X} {d 
   cases hg
   rfl
 
-namespace CommaExpArr
+namespace CommaLexp
 
 universe v₁ v₂ u₁ u₂
 
@@ -257,23 +267,25 @@ noncomputable def toCommaPreserves : FunctorPreserves u (toComma α) where
 
 end Sections
 
-end CommaExpArr
+end CommaLexp
 
-namespace ExpArrCat
+namespace Lexp
 
 universe v u
 
-/-- An object `A` of `ExpArrCat` is bi-initial if every hom-category `A ⟶ B` is equivalent to the
-terminal category. -/
-def IsBiInitial (A : ExpArrCat.{v, u}) : Prop :=
-  ∀ B : ExpArrCat.{v, u}, Nonempty ((A ⟶ B) ≌ Discrete PUnit.{1})
+/-- An object `A` of `Lexp` is bi-initial if every hom-category `A ⟶ B` is equivalent to the
+terminal category.
+
+[Paper, §2.2, Thm. `thm:uemura`]: bi-initiality. -/
+def IsBiInitial (A : Lexp.{v, u}) : Prop :=
+  ∀ B : Lexp.{v, u}, Nonempty ((A ⟶ B) ≌ Discrete PUnit.{1})
 
 namespace IsBiInitial
 
-variable {A : ExpArrCat.{v, u}} {B : ExpArrCat.{v, u}}
+variable {A : Lexp.{v, u}} {B : Lexp.{v, u}}
 
 /-- A bi-initial object has a morphism to every object. -/
-lemma nonempty_hom (hA : IsBiInitial A) (B : ExpArrCat.{v, u}) : Nonempty (A ⟶ B) :=
+lemma nonempty_hom (hA : IsBiInitial A) (B : Lexp.{v, u}) : Nonempty (A ⟶ B) :=
   ⟨(hA B).some.inverse.obj ⟨⟨⟩⟩⟩
 
 /-- Any two parallel 2-cells out of a bi-initial object coincide. -/
@@ -298,13 +310,13 @@ noncomputable def _root_.IsExpArr.ofIso {D : Type*} [Category D] {Y X Y' X' : D}
 
 section Comma
 
-variable {A C : ExpArrCat.{v, max u v}} (F : A ⥤ C) [PreservesLimitsOfShape WalkingCospan F]
+variable {A C : Lexp.{v, max u v}} (F : A ⥤ C) [PreservesLimitsOfShape WalkingCospan F]
   (G : A ⟶ C) [IsExpArr (G.functor.map A.arr)] {y : F.obj A.dom ⟶ G.functor.obj A.dom}
   {x : F.obj A.cod ⟶ G.functor.obj A.cod}
   (hsq : IsPullback y (F.map A.arr) (G.functor.map A.arr) x)
 
-/-- The comma category `Comma F (𝟭 C)` as an `ExpArrCat`, with the arrow `(p, G p)`. -/
-noncomputable abbrev commaOf : ExpArrCat.{v, max u v} :=
+/-- The comma category `Comma F (𝟭 C)` as an `Lexp`, with the arrow `(p, G p)`. -/
+noncomputable abbrev commaOf : Lexp.{v, max u v} :=
   comma F A.arr (G.functor.map A.arr) hsq
 
 /-- The first projection from the comma category. -/
@@ -314,7 +326,7 @@ noncomputable def commaFst : commaOf F G hsq ⟶ A :=
       (PreservesLimitsOfShape WalkingCospan (Comma.fst F (𝟭 C.carrier)))
     preservesTerminal := inferInstanceAs
       (PreservesLimitsOfShape (Discrete PEmpty.{1}) (Comma.fst F (𝟭 C.carrier)))
-    preservesArr := CommaExpArr.fstPreserves F A.arr (G.functor.map A.arr) hsq
+    preservesArr := CommaLexp.fstPreserves F A.arr (G.functor.map A.arr) hsq
     iso := Iso.refl _ }
 
 /-- The second projection from the comma category. -/
@@ -324,24 +336,24 @@ noncomputable def commaSnd : commaOf F G hsq ⟶ C :=
       (PreservesLimitsOfShape WalkingCospan (Comma.snd F (𝟭 C.carrier)))
     preservesTerminal := inferInstanceAs
       (PreservesLimitsOfShape (Discrete PEmpty.{1}) (Comma.snd F (𝟭 C.carrier)))
-    preservesArr := CommaExpArr.sndPreserves F A.arr (G.functor.map A.arr) hsq
+    preservesArr := CommaLexp.sndPreserves F A.arr (G.functor.map A.arr) hsq
     iso := G.iso }
 
-/-- The `ExpArrCat`-morphism `A ⟶ commaOf F G hsq` associated to a natural transformation
+/-- The `Lexp`-morphism `A ⟶ commaOf F G hsq` associated to a natural transformation
 `α : F ⟶ G` restricting to the pullback square `hsq`. -/
 noncomputable def commaSec (α : F ⟶ G.functor) (hα : α.app A.dom = y) (hαx : α.app A.cod = x) :
     A ⟶ commaOf F G hsq :=
-  { functor := CommaExpArr.toComma α
+  { functor := CommaLexp.toComma α
     preservesPullbacks := inferInstanceAs
-      (PreservesLimitsOfShape WalkingCospan (CommaExpArr.toComma α))
+      (PreservesLimitsOfShape WalkingCospan (CommaLexp.toComma α))
     preservesTerminal := inferInstanceAs
-      (PreservesLimitsOfShape (Discrete PEmpty.{1}) (CommaExpArr.toComma α))
-    preservesArr := CommaExpArr.toCommaPreserves α A.arr (by subst hα hαx; exact hsq)
+      (PreservesLimitsOfShape (Discrete PEmpty.{1}) (CommaLexp.toComma α))
+    preservesArr := CommaLexp.toCommaPreserves α A.arr (by subst hα hαx; exact hsq)
     iso := Arrow.isoMk
-      (Comma.isoMk (X := (CommaExpArr.toComma α).obj A.dom) (Y := CommaExpArr.commaDom F y)
-        (Iso.refl _) (Iso.refl _) (by simp [hα, CommaExpArr.toComma]))
-      (Comma.isoMk (X := (CommaExpArr.toComma α).obj A.cod) (Y := CommaExpArr.commaCod F x)
-        (Iso.refl _) (Iso.refl _) (by simp [hαx, CommaExpArr.toComma]))
+      (Comma.isoMk (X := (CommaLexp.toComma α).obj A.dom) (Y := CommaLexp.commaDom F y)
+        (Iso.refl _) (Iso.refl _) (by simp [hα, CommaLexp.toComma]))
+      (Comma.isoMk (X := (CommaLexp.toComma α).obj A.cod) (Y := CommaLexp.commaCod F x)
+        (Iso.refl _) (Iso.refl _) (by simp [hαx, CommaLexp.toComma]))
       (CommaMorphism.ext
         (by change 𝟙 A.dom ≫ A.arr = A.arr ≫ 𝟙 A.cod; simp)
         (by change 𝟙 (G.functor.obj A.dom) ≫ G.functor.map A.arr =
@@ -350,7 +362,7 @@ noncomputable def commaSec (α : F ⟶ G.functor) (hα : α.app A.dom = y) (hαx
 variable {F G}
 
 @[simp] lemma commaSec_functor (α : F ⟶ G.functor) (hα : α.app A.dom = y)
-    (hαx : α.app A.cod = x) : (commaSec F G hsq α hα hαx).functor = CommaExpArr.toComma α := rfl
+    (hαx : α.app A.cod = x) : (commaSec F G hsq α hα hαx).functor = CommaLexp.toComma α := rfl
 
 @[simp] lemma commaSec_iso_hom_left_left (α : F ⟶ G.functor) (hα : α.app A.dom = y)
     (hαx : α.app A.cod = x) : (commaSec F G hsq α hα hαx).iso.hom.left.left = 𝟙 A.dom := rfl
@@ -406,9 +418,9 @@ lemma natTrans_exists (hA : IsBiInitial A) :
   obtain ⟨e₁⟩ := hA.nonempty_iso (K ≫ commaFst F G hsq) (𝟙 A)
   obtain ⟨e₂⟩ := hA.nonempty_iso (K ≫ commaSnd F G hsq) G
   let T : A.carrier ⥤ Comma F (𝟭 C.carrier) := K.functor
-  let α : F ⟶ G.functor := CommaExpArr.natTransOfSection T e₁.inv.nat e₂.hom.nat
-  let k : T.obj A.dom ⟶ CommaExpArr.commaDom F y := K.iso.hom.left
-  let k' : T.obj A.cod ⟶ CommaExpArr.commaCod F x := K.iso.hom.right
+  let α : F ⟶ G.functor := CommaLexp.natTransOfSection T e₁.inv.nat e₂.hom.nat
+  let k : T.obj A.dom ⟶ CommaLexp.commaDom F y := K.iso.hom.left
+  let k' : T.obj A.cod ⟶ CommaLexp.commaCod F x := K.iso.hom.right
   let a : A.dom ⟶ (T.obj A.dom).left := e₁.inv.nat.app A.dom
   let a' : A.cod ⟶ (T.obj A.cod).left := e₁.inv.nat.app A.cod
   let b : (T.obj A.dom).right ⟶ G.functor.obj A.dom := e₂.hom.nat.app A.dom
@@ -435,12 +447,14 @@ lemma natTrans_exists (hA : IsBiInitial A) :
 
 end Comma
 
-/-- **Main theorem.** Let `A` (`FinGAT`) be a bi-initial `ExpArrCat`, with chosen exponentiable
-arrow `p = A.arr : Y ⟶ X`. Let `C` be an `ExpArrCat`, `F : A ⥤ C` a functor preserving pullbacks,
-`G : A ⟶ C` a morphism of `ExpArrCat`, and `f : F p ⟶ G p` a morphism of arrows whose underlying
+/-- **Main theorem.** Let `A` (`FinGAT`) be a bi-initial `Lexp`, with chosen exponentiable
+arrow `p = A.arr : Y ⟶ X`. Let `C` be an `Lexp`, `F : A ⥤ C` a functor preserving pullbacks,
+`G : A ⟶ C` a morphism of `Lexp`, and `f : F p ⟶ G p` a morphism of arrows whose underlying
 square is a pullback. Then there is a unique natural transformation `α : F ⟶ G` whose components
-at `Y` and `X` are the components of `f`. -/
-theorem IsBiInitial.existsUnique_natTrans_gen {A C : ExpArrCat.{v, max u v}} (hA : IsBiInitial A)
+at `Y` and `X` are the components of `f`.
+
+[Paper, §2.2, Thm. `thm:universal-property-natural-transformation`], general form. -/
+theorem IsBiInitial.existsUnique_natTrans_gen {A C : Lexp.{v, max u v}} (hA : IsBiInitial A)
     (F : A.carrier ⥤ C.carrier) [PreservesLimitsOfShape WalkingCospan F] (G : A ⟶ C)
     (f : Arrow.mk (F.map A.arr) ⟶ Arrow.mk (G.functor.map A.arr))
     (hf : IsPullback f.left (F.map A.arr) (G.functor.map A.arr) f.right) :
@@ -449,8 +463,10 @@ theorem IsBiInitial.existsUnique_natTrans_gen {A C : ExpArrCat.{v, max u v}} (hA
   obtain ⟨α, h₁, h₂⟩ := natTrans_exists (hsq := hf) hA
   exact ⟨α, ⟨h₁, h₂⟩, fun α' h' => natTrans_unique hf hA h'.1 h'.2 h₁ h₂⟩
 
-/-- `IsBiInitial.existsUnique_natTrans_gen` for objects of `ExpArrCat.{u, u}`. -/
-theorem IsBiInitial.existsUnique_natTrans {A C : ExpArrCat.{u, u}} (hA : IsBiInitial A)
+/-- `IsBiInitial.existsUnique_natTrans_gen` for objects of `Lexp.{u, u}`.
+
+[Paper, §2.2, Thm. `thm:universal-property-natural-transformation`]. -/
+theorem IsBiInitial.existsUnique_natTrans {A C : Lexp.{u, u}} (hA : IsBiInitial A)
     (F : A.carrier ⥤ C.carrier) [PreservesLimitsOfShape WalkingCospan F] (G : A ⟶ C)
     (f : Arrow.mk (F.map A.arr) ⟶ Arrow.mk (G.functor.map A.arr))
     (hf : IsPullback f.left (F.map A.arr) (G.functor.map A.arr) f.right) :
@@ -458,8 +474,10 @@ theorem IsBiInitial.existsUnique_natTrans {A C : ExpArrCat.{u, u}} (hA : IsBiIni
   IsBiInitial.existsUnique_natTrans_gen.{u, u} hA F G f hf
 
 /-- Variant of `IsBiInitial.existsUnique_natTrans_gen` where the square is given as a morphism of
-arrows to the chosen arrow of `C`, through the isomorphism `G.iso`. -/
-theorem IsBiInitial.existsUnique_natTrans_iso {A C : ExpArrCat.{v, max u v}} (hA : IsBiInitial A)
+arrows to the chosen arrow of `C`, through the isomorphism `G.iso`.
+
+[Paper, §2.2, Thm. `thm:universal-property-natural-transformation`], variant where the target square commutes up to the chosen isomorphism. -/
+theorem IsBiInitial.existsUnique_natTrans_iso {A C : Lexp.{v, max u v}} (hA : IsBiInitial A)
     (F : A.carrier ⥤ C.carrier) [PreservesLimitsOfShape WalkingCospan F] (G : A ⟶ C)
     (f : Arrow.mk (F.map A.arr) ⟶ Arrow.mk C.arr)
     (hf : IsPullback f.left (F.map A.arr) C.arr f.right) :
@@ -475,4 +493,4 @@ theorem IsBiInitial.existsUnique_natTrans_iso {A C : ExpArrCat.{v, max u v}} (hA
   · rw [Arrow.comp_left, ← hβ.1, Category.assoc, ← Arrow.comp_left, Iso.hom_inv_id]; simp
   · rw [Arrow.comp_right, ← hβ.2, Category.assoc, ← Arrow.comp_right, Iso.hom_inv_id]; simp
 
-end ExpArrCat
+end Lexp
