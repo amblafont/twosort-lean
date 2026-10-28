@@ -10,9 +10,9 @@ import CartexpAristotle.Lexp
 /-!
 # Comma categories as categories with a chosen exponentiable arrow
 
-Let `F : C ⥤ C'` be a functor preserving pullbacks between categories with a chosen exponentiable
-arrow `p : Y ⟶ X` in `C` and `p' : Y' ⟶ X'` in `C'`, and let `y : F Y ⟶ Y'`, `x : F X ⟶ X'` be
-such that the square
+Let `F : C ⥤ C'` be a functor between categories with a chosen exponentiable
+arrow `p : Y ⟶ X` in `C` and `p' : Y' ⟶ X'` in `C'`, preserving pullbacks along `p`, and let
+`y : F Y ⟶ Y'`, `x : F X ⟶ X'` be such that the square
 ```
 F Y --y--> Y'
  |          |
@@ -145,7 +145,8 @@ end Generic
 section Exponentiable
 
 variable {C : Type u₁} [Category.{v₁} C] {C' : Type u₂} [Category.{v₂} C'] (F : C ⥤ C')
-  [PreservesLimitsOfShape WalkingCospan F] {Y X : C} (u : Y ⟶ X) {Y' X' : C'} (u' : Y' ⟶ X')
+  {Y X : C} (u : Y ⟶ X) [∀ {d : C} (a : d ⟶ X), PreservesLimit (cospan u a) F]
+  {Y' X' : C'} (u' : Y' ⟶ X')
   [IsExpArr u] [IsExpArr u'] {y : F.obj Y ⟶ Y'} {x : F.obj X ⟶ X'}
   (hsq : IsPullback y (F.map u) u' x)
 
@@ -389,15 +390,16 @@ end Exponentiable
 end CommaLexp
 
 open CommaLexp in
-/-- Given a functor `F : C ⥤ C'` preserving pullbacks between categories with pullbacks and a
-terminal object, with exponentiable arrows `u : Y ⟶ X` and `u' : Y' ⟶ X'` and maps
-`y : F Y ⟶ Y'`, `x : F X ⟶ X'` making the evident square a pullback, the comma category
-`Comma F (𝟭 C')` is a category with a chosen exponentiable arrow, namely `(u, u')`.
+/-- Given a functor `F : C ⥤ C'` between categories with pullbacks and a
+terminal object, with exponentiable arrows `u : Y ⟶ X` and `u' : Y' ⟶ X'`, preserving pullbacks
+along `u`, and maps `y : F Y ⟶ Y'`, `x : F X ⟶ X'` making the evident square a pullback, the comma
+category `Comma F (𝟭 C')` is a category with a chosen exponentiable arrow, namely `(u, u')`.
 
 [Paper, App. A.3, Prop. `prop:comma-lexp`]. -/
 noncomputable def Lexp.comma {C : Type u₁} [Category.{v₁} C] [HasPullbacks C] [HasTerminal C]
     {C' : Type u₂} [Category.{v₂} C'] [HasPullbacks C'] [HasTerminal C'] (F : C ⥤ C')
-    [PreservesLimitsOfShape WalkingCospan F] {Y X : C} (u : Y ⟶ X) {Y' X' : C'} (u' : Y' ⟶ X')
+    {Y X : C} (u : Y ⟶ X) [∀ {d : C} (a : d ⟶ X), PreservesLimit (cospan u a) F]
+    {Y' X' : C'} (u' : Y' ⟶ X')
     [IsExpArr u] [IsExpArr u'] {y : F.obj Y ⟶ Y'} {x : F.obj X ⟶ X'}
     (hsq : IsPullback y (F.map u) u' x) : Lexp.{max v₁ v₂, max u₁ u₂ v₂} where
   carrier := Comma F (𝟭 C')

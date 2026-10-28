@@ -9,7 +9,7 @@ import CartexpAristotle.CommaLexp
 # Maps out of a bi-initial `Lexp`
 
 Let `FinGAT` be a bi-initial object of the 2-category `Lexp`, with chosen exponentiable arrow
-`p : Y ⟶ X`.  Given an `Lexp` `C`, a pullback-preserving functor `F : FinGAT ⥤ C`, an
+`p : Y ⟶ X`.  Given an `Lexp` `C`, a functor `F : FinGAT ⥤ C` preserving pullbacks along `p`, an
 `Lexp`-morphism `G : FinGAT ⟶ C` and a morphism `f : F p ⟶ G p` of arrows which forms a
 pullback square, there is a unique natural transformation `F ⟶ G` restricting to `f`
 (`Lexp.IsBiInitial.existsUnique_natTrans`).
@@ -136,8 +136,9 @@ end Preservation
 section Components
 
 variable {C : Type u₁} [Category.{v₁} C] [HasPullbacks C] {C' : Type u₂} [Category.{v₂} C']
-  [HasPullbacks C'] (F : C ⥤ C') [PreservesLimitsOfShape WalkingCospan F] {Y X : C} (u : Y ⟶ X)
-  {Y' X' : C'} (u' : Y' ⟶ X') [IsExpArr u] [IsExpArr u'] {y : F.obj Y ⟶ Y'} {x : F.obj X ⟶ X'}
+  [HasPullbacks C'] (F : C ⥤ C') {Y X : C} (u : Y ⟶ X)
+  [∀ {d : C} (a : d ⟶ X), PreservesLimit (cospan u a) F] {Y' X' : C'} (u' : Y' ⟶ X')
+  [IsExpArr u] [IsExpArr u'] {y : F.obj Y ⟶ Y'} {x : F.obj X ⟶ X'}
   (hsq : IsPullback y (F.map u) u' x)
 
 lemma canonical_comma_left {c : Comma F (𝟭 C')} (D : Data (commaArr F u u' hsq) c) :
@@ -240,8 +241,9 @@ natural isomorphism. -/
     rw [← F.map_comp_assoc, ha, F.map_comp_assoc, reassoc_of% hw, hb]
     simp only [Category.assoc]
 
-variable [PreservesLimitsOfShape WalkingCospan F] [PreservesLimitsOfShape WalkingCospan G]
-  {Y X : C} (u : Y ⟶ X) [IsExpArr u] [IsExpArr (G.map u)] [FunctorPreserves u G]
+variable [PreservesLimitsOfShape WalkingCospan G]
+  {Y X : C} (u : Y ⟶ X) [∀ {d : C} (a : d ⟶ X), PreservesLimit (cospan u a) F]
+  [IsExpArr u] [IsExpArr (G.map u)] [FunctorPreserves u G]
   (hsq : IsPullback (α.app Y) (F.map u) (G.map u) (α.app X))
 
 /-- If `α : F ⟶ G` is a natural transformation whose component at an exponentiable arrow `u` is
@@ -310,7 +312,8 @@ noncomputable def _root_.IsExpArr.ofIso {D : Type*} [Category D] {Y X Y' X' : D}
 
 section Comma
 
-variable {A C : Lexp.{v, max u v}} (F : A ⥤ C) [PreservesLimitsOfShape WalkingCospan F]
+variable {A C : Lexp.{v, max u v}} (F : A ⥤ C)
+  [∀ {d : A} (a : d ⟶ A.cod), PreservesLimit (cospan A.arr a) F]
   (G : A ⟶ C) [IsExpArr (G.functor.map A.arr)] {y : F.obj A.dom ⟶ G.functor.obj A.dom}
   {x : F.obj A.cod ⟶ G.functor.obj A.cod}
   (hsq : IsPullback y (F.map A.arr) (G.functor.map A.arr) x)
@@ -448,14 +451,15 @@ lemma natTrans_exists (hA : IsBiInitial A) :
 end Comma
 
 /-- **Main theorem.** Let `A` (`FinGAT`) be a bi-initial `Lexp`, with chosen exponentiable
-arrow `p = A.arr : Y ⟶ X`. Let `C` be an `Lexp`, `F : A ⥤ C` a functor preserving pullbacks,
-`G : A ⟶ C` a morphism of `Lexp`, and `f : F p ⟶ G p` a morphism of arrows whose underlying
-square is a pullback. Then there is a unique natural transformation `α : F ⟶ G` whose components
-at `Y` and `X` are the components of `f`.
+arrow `p = A.arr : Y ⟶ X`. Let `C` be an `Lexp`, `F : A ⥤ C` a functor preserving pullbacks
+along `p`, `G : A ⟶ C` a morphism of `Lexp`, and `f : F p ⟶ G p` a morphism of arrows whose
+underlying square is a pullback. Then there is a unique natural transformation `α : F ⟶ G` whose
+components at `Y` and `X` are the components of `f`.
 
 [Paper, §2.2, Thm. `thm:universal-property-natural-transformation`], general form. -/
 theorem IsBiInitial.existsUnique_natTrans_gen {A C : Lexp.{v, max u v}} (hA : IsBiInitial A)
-    (F : A.carrier ⥤ C.carrier) [PreservesLimitsOfShape WalkingCospan F] (G : A ⟶ C)
+    (F : A.carrier ⥤ C.carrier)
+    [∀ {d : A.carrier} (a : d ⟶ A.cod), PreservesLimit (cospan A.arr a) F] (G : A ⟶ C)
     (f : Arrow.mk (F.map A.arr) ⟶ Arrow.mk (G.functor.map A.arr))
     (hf : IsPullback f.left (F.map A.arr) (G.functor.map A.arr) f.right) :
     ∃! α : F ⟶ G.functor, α.app A.dom = f.left ∧ α.app A.cod = f.right := by
@@ -467,21 +471,23 @@ theorem IsBiInitial.existsUnique_natTrans_gen {A C : Lexp.{v, max u v}} (hA : Is
 
 [Paper, §2.2, Thm. `thm:universal-property-natural-transformation`]. -/
 theorem IsBiInitial.existsUnique_natTrans {A C : Lexp.{u, u}} (hA : IsBiInitial A)
-    (F : A.carrier ⥤ C.carrier) [PreservesLimitsOfShape WalkingCospan F] (G : A ⟶ C)
+    (F : A.carrier ⥤ C.carrier)
+    [∀ {d : A.carrier} (a : d ⟶ A.cod), PreservesLimit (cospan A.arr a) F] (G : A ⟶ C)
     (f : Arrow.mk (F.map A.arr) ⟶ Arrow.mk (G.functor.map A.arr))
     (hf : IsPullback f.left (F.map A.arr) (G.functor.map A.arr) f.right) :
     ∃! α : F ⟶ G.functor, α.app A.dom = f.left ∧ α.app A.cod = f.right :=
   IsBiInitial.existsUnique_natTrans_gen.{u, u} hA F G f hf
 
 /-- The universal property of natural transformations into the underlying functor of a morphism
-`G : A ⟶ C` of `Lexp`: for every pullback-preserving functor `F : A ⥤ C` and every morphism of
-arrows `f : F p ⟶ G p` forming a pullback square, there is a unique natural transformation
-`F ⟶ G` restricting to `f`. By `IsBiInitial.hasUniversalNatTrans`, every morphism out of a
-bi-initial object of `Lexp` has this property.
+`G : A ⟶ C` of `Lexp`: for every functor `F : A ⥤ C` preserving pullbacks along `A.arr` and every
+morphism of arrows `f : F p ⟶ G p` forming a pullback square, there is a unique natural
+transformation `F ⟶ G` restricting to `f`. By `IsBiInitial.hasUniversalNatTrans`, every morphism
+out of a bi-initial object of `Lexp` has this property.
 
 [Paper, §2.2, Thm. `thm:universal-property-natural-transformation`], as a property of `G`. -/
 def HasUniversalNatTrans {A C : Lexp.{v, u}} (G : A ⟶ C) : Prop :=
-  ∀ (F : A.carrier ⥤ C.carrier) [PreservesLimitsOfShape WalkingCospan F]
+  ∀ (F : A.carrier ⥤ C.carrier)
+    [∀ {d : A.carrier} (a : d ⟶ A.cod), PreservesLimit (cospan A.arr a) F]
     (f : Arrow.mk (F.map A.arr) ⟶ Arrow.mk (G.functor.map A.arr)),
     IsPullback f.left (F.map A.arr) (G.functor.map A.arr) f.right →
     ∃! α : F ⟶ G.functor, α.app A.dom = f.left ∧ α.app A.cod = f.right
@@ -499,7 +505,8 @@ chosen arrow of `C`, through the isomorphism `G.iso`.
 square commutes up to the chosen isomorphism. -/
 theorem HasUniversalNatTrans.existsUnique_iso {A C : Lexp.{v, u}} {G : A ⟶ C}
     (hG : HasUniversalNatTrans G)
-    (F : A.carrier ⥤ C.carrier) [PreservesLimitsOfShape WalkingCospan F]
+    (F : A.carrier ⥤ C.carrier)
+    [∀ {d : A.carrier} (a : d ⟶ A.cod), PreservesLimit (cospan A.arr a) F]
     (f : Arrow.mk (F.map A.arr) ⟶ Arrow.mk C.arr)
     (hf : IsPullback f.left (F.map A.arr) C.arr f.right) :
     ∃! α : F ⟶ G.functor, α.app A.dom ≫ G.iso.hom.left = f.left ∧
@@ -519,7 +526,8 @@ arrows to the chosen arrow of `C`, through the isomorphism `G.iso`.
 
 [Paper, §2.2, Thm. `thm:universal-property-natural-transformation`], variant where the target square commutes up to the chosen isomorphism. -/
 theorem IsBiInitial.existsUnique_natTrans_iso {A C : Lexp.{v, max u v}} (hA : IsBiInitial A)
-    (F : A.carrier ⥤ C.carrier) [PreservesLimitsOfShape WalkingCospan F] (G : A ⟶ C)
+    (F : A.carrier ⥤ C.carrier)
+    [∀ {d : A.carrier} (a : d ⟶ A.cod), PreservesLimit (cospan A.arr a) F] (G : A ⟶ C)
     (f : Arrow.mk (F.map A.arr) ⟶ Arrow.mk C.arr)
     (hf : IsPullback f.left (F.map A.arr) C.arr f.right) :
     ∃! α : F ⟶ G.functor, α.app A.dom ≫ G.iso.hom.left = f.left ∧

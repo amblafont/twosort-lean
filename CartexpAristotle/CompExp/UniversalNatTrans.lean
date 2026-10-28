@@ -12,16 +12,16 @@ import CartexpAristotle.UniversalNatTrans
 This is the analogue for `CompExp` of `CartexpAristotle.UniversalNatTrans`.
 
 Let `A` be a bi-initial object of `CompExp`. Given an object `C` of `CompExp`, a
-pullback-preserving functor `F : A ⥤ C`, a morphism `G : A ⟶ C` of `CompExp` and a morphism
-`f : F p ⟶ G p` of arrows which forms a pullback square, there is a unique natural transformation
-`F ⟶ G` restricting to `f` (`CompExp.IsBiInitial.hasUniversalNatTrans`, stated with the property
-`Lexp.HasUniversalNatTrans` of the underlying morphism of `Lexp`).
+functor `F : A ⥤ C` preserving pullbacks along `p = A.arr`, a morphism `G : A ⟶ C` of `CompExp` and
+a morphism `f : F p ⟶ G p` of arrows which forms a pullback square, there is a unique natural
+transformation `F ⟶ G` restricting to `f` (`CompExp.IsBiInitial.hasUniversalNatTrans`, stated with
+the property `Lexp.HasUniversalNatTrans` of the underlying morphism of `Lexp`).
 
 The proof is the same as for `Lexp`: the comma category `Comma F (𝟭 C)` is an object of `Lexp`
 (`Lexp.commaOf`), and it has all the `w`-small wide pullbacks of `A` and `C` (computed
 componentwise, whatever `F` is), so it is an object of `CompExp`; the projections and the section
 associated to a natural transformation `α : F ⟶ G` preserve them (the latter because `G` does).
-Note that, as in `Lexp`, `F` only needs to preserve pullbacks.
+Note that, as in `Lexp`, `F` only needs to preserve pullbacks along `A.arr`.
 
 ## References
 
@@ -64,7 +64,7 @@ end IsBiInitial
 section Comma
 
 variable {A C : CompExp.{w, v, max u v}} (F : A.carrier ⥤ C.carrier)
-  [PreservesLimitsOfShape WalkingCospan F]
+  [∀ {d : A.carrier} (a : d ⟶ A.cod), PreservesLimit (cospan A.arr a) F]
   (G : A ⟶ C) [IsExpArr (G.functor.map A.arr)] {y : F.obj A.dom ⟶ G.functor.obj A.dom}
   {x : F.obj A.cod ⟶ G.functor.obj A.cod}
   (hsq : IsPullback y (F.map A.arr) (G.functor.map A.arr) x)
@@ -179,13 +179,14 @@ end Comma
 
 /-- **Main theorem.** Let `A` be a bi-initial object of `CompExp`, with chosen exponentiable arrow
 `p = A.arr : Y ⟶ X`. Let `C` be an object of `CompExp`, `F : A ⥤ C` a functor preserving
-pullbacks, `G : A ⟶ C` a morphism of `CompExp`, and `f : F p ⟶ G p` a morphism of arrows whose
-underlying square is a pullback. Then there is a unique natural transformation `α : F ⟶ G` whose
-components at `Y` and `X` are the components of `f`.
+pullbacks along `p`, `G : A ⟶ C` a morphism of `CompExp`, and `f : F p ⟶ G p` a morphism of arrows
+whose underlying square is a pullback. Then there is a unique natural transformation `α : F ⟶ G`
+whose components at `Y` and `X` are the components of `f`.
 
 [Paper, §2.2, Thm. `thm:universal-property-natural-transformation`], for `CompExp`. -/
 theorem IsBiInitial.existsUnique_natTrans_gen {A C : CompExp.{w, v, max u v}} (hA : IsBiInitial A)
-    (F : A.carrier ⥤ C.carrier) [PreservesLimitsOfShape WalkingCospan F] (G : A ⟶ C)
+    (F : A.carrier ⥤ C.carrier)
+    [∀ {d : A.carrier} (a : d ⟶ A.cod), PreservesLimit (cospan A.arr a) F] (G : A ⟶ C)
     (f : Arrow.mk (F.map A.arr) ⟶ Arrow.mk (G.functor.map A.arr))
     (hf : IsPullback f.left (F.map A.arr) (G.functor.map A.arr) f.right) :
     ∃! α : F ⟶ G.functor, α.app A.dom = f.left ∧ α.app A.cod = f.right := by
