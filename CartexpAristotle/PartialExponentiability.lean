@@ -518,3 +518,234 @@ class IsExpArr (u : Y ⟶ X) where
   isExpArrow : ∀ c : C, Universal (isExpArrowData c)
 
 attribute [instance] IsExpArr.isExpArrow
+
+section PushforwardPreservation
+
+variable {C : Type*} [Category C] {D : Type*} [Category D] {X Y : C}
+
+private lemma FBF_on_mor_comp' {u : Y ⟶ X} {c c' c'' : C}
+    (d₁ : Data u c) (d₂ : Data u c') (d₃ : Data u c'')
+    {f : d₁.P ⟶ d₂.P} {g : d₂.P ⟶ d₃.P} (hf : d₁.pi = f ≫ d₂.pi) (hg : d₂.pi = g ≫ d₃.pi)
+    (hfg : d₁.pi = (f ≫ g) ≫ d₃.pi) :
+    FBF_on_mor d₃ d₁.Pbk hfg = FBF_on_mor d₂ d₁.Pbk hf ≫ FBF_on_mor d₃ d₂.Pbk hg := by
+  dsimp [FBF_on_mor, pullbackMor1]
+  ext <;> simp
+
+private lemma FBF_on_mor_id' {u : Y ⟶ X} {c : C} (d : Data u c) (h : d.pi = 𝟙 d.P ≫ d.pi) :
+    FBF_on_mor d d.Pbk h = 𝟙 _ := by
+  dsimp [FBF_on_mor, pullbackMor1]
+  ext <;> simp
+
+private lemma canonical_mor'_comp' {u : Y ⟶ X} {c c' c'' : C} (g : c ⟶ c') (g' : c' ⟶ c'')
+    (d₁ : Data u c) (d₂ : Data u c') [Universal d₂] (d₃ : Data u c'') [Universal d₃] :
+    canonical_mor' g d₂ d₁ ≫ canonical_mor' g' d₃ d₂ = canonical_mor' (g ≫ g') d₃ d₁ := by
+  have h1 : d₁.pi = canonical_mor' g d₂ d₁ ≫ d₂.pi := Universal.isSlice (d₁.epsilon ≫ g)
+  have h2 : d₂.pi = canonical_mor' g' d₃ d₂ ≫ d₃.pi := Universal.isSlice (d₂.epsilon ≫ g')
+  have h3 : d₁.pi = (canonical_mor' g d₂ d₁ ≫ canonical_mor' g' d₃ d₂) ≫ d₃.pi := by
+    rw [Category.assoc, ← h2, ← h1]
+  refine mor_unique (d1 := d₃) (d₁.epsilon ≫ g ≫ g') _ h3 ?_
+  have e1 : d₁.epsilon ≫ g = FBF_on_mor d₂ d₁.Pbk h1 ≫ d₂.epsilon := Universal.comm _
+  have e2 : d₂.epsilon ≫ g' = FBF_on_mor d₃ d₂.Pbk h2 ≫ d₃.epsilon := Universal.comm _
+  change _ = FBF_on_mor d₃ d₁.Pbk h3 ≫ d₃.epsilon
+  rw [FBF_on_mor_comp' d₁ d₂ d₃ h1 h2 h3, Category.assoc, ← e2, ← Category.assoc, e1,
+    Category.assoc]
+
+private lemma canonical_mor'_id' {u : Y ⟶ X} {c : C} (d : Data u c) [Universal d] :
+    canonical_mor' (𝟙 c) d d = 𝟙 _ := by
+  have h : d.pi = 𝟙 d.P ≫ d.pi := (Category.id_comp _).symm
+  symm
+  refine mor_unique (d1 := d) (d.epsilon ≫ 𝟙 c) _ h ?_
+  change _ = FBF_on_mor d d.Pbk h ≫ d.epsilon
+  rw [FBF_on_mor_id', Category.id_comp, Category.comp_id]
+
+private lemma canonical_mor_comp_canonical_mor' {u : Y ⟶ X} {c c' : C} (g : c ⟶ c')
+    (d₁ : Data u c) (d₂ : Data u c) [Universal d₂] (d₃ : Data u c') [Universal d₃] :
+    canonical_mor d₂ d₁ ≫ canonical_mor' g d₃ d₂ = canonical_mor' g d₃ d₁ := by
+  have h1 : d₁.pi = canonical_mor d₂ d₁ ≫ d₂.pi := Universal.isSlice d₁.epsilon
+  have h2 : d₂.pi = canonical_mor' g d₃ d₂ ≫ d₃.pi := Universal.isSlice (d₂.epsilon ≫ g)
+  have h3 : d₁.pi = (canonical_mor d₂ d₁ ≫ canonical_mor' g d₃ d₂) ≫ d₃.pi := by
+    rw [Category.assoc, ← h2, ← h1]
+  refine mor_unique (d1 := d₃) (d₁.epsilon ≫ g) _ h3 ?_
+  have e1 : d₁.epsilon = FBF_on_mor d₂ d₁.Pbk h1 ≫ d₂.epsilon := Universal.comm _
+  have e2 : d₂.epsilon ≫ g = FBF_on_mor d₃ d₂.Pbk h2 ≫ d₃.epsilon := Universal.comm _
+  change _ = FBF_on_mor d₃ d₁.Pbk h3 ≫ d₃.epsilon
+  rw [FBF_on_mor_comp' d₁ d₂ d₃ h1 h2 h3, Category.assoc, ← e2, ← Category.assoc, ← e1]
+
+private lemma map_FBF_on_mor {u : Y ⟶ X} (F : C ⥤ D) [PreservesLimitsOfShape WalkingCospan F]
+    {c c' : C} (d₁ : Data u c) (d₂ : Data u c') {f : d₁.P ⟶ d₂.P}
+    (hf : d₁.pi = f ≫ d₂.pi) (hf' : (functor_on F d₁).pi = F.map f ≫ (functor_on F d₂).pi) :
+    F.map (FBF_on_mor d₂ d₁.Pbk hf) =
+      FBF_on_mor (functor_on F d₂) (functor_on F d₁).Pbk hf' := by
+  apply ChosenPullback.hom_ext (functor_on F d₂).Pbk
+  · change F.map _ ≫ F.map _ = _
+    rw [← F.map_comp]
+    simp only [pullbackMor1, FBF_on_mor, IsPullback.lift_fst]
+    rfl
+  · change F.map _ ≫ F.map _ = _
+    rw [← F.map_comp]
+    simp only [pullbackMor1, FBF_on_mor, IsPullback.lift_snd, F.map_comp]
+    rfl
+
+private lemma map_canonical_mor'_comp_canonical_mor {u : Y ⟶ X} (F : C ⥤ D)
+    [PreservesLimitsOfShape WalkingCospan F] {c c' : C} (g : c ⟶ c')
+    (d₁ : Data u c) (d₂ : Data u c') [Universal d₂]
+    (d₂' : Data (F.map u) (F.obj c')) [Universal d₂'] :
+    F.map (canonical_mor' g d₂ d₁) ≫ canonical_mor d₂' (functor_on F d₂) =
+      canonical_mor' (F.map g) d₂' (functor_on F d₁) := by
+  have h1 : d₁.pi = canonical_mor' g d₂ d₁ ≫ d₂.pi := Universal.isSlice (d₁.epsilon ≫ g)
+  have h1' : (functor_on F d₁).pi =
+      F.map (canonical_mor' g d₂ d₁) ≫ (functor_on F d₂).pi := by
+    change F.map d₁.pi = F.map (canonical_mor' g d₂ d₁) ≫ F.map d₂.pi
+    rw [h1, F.map_comp]
+  have h2 : (functor_on F d₂).pi = canonical_mor d₂' (functor_on F d₂) ≫ d₂'.pi :=
+    Universal.isSlice (functor_on F d₂).epsilon
+  have h3 : (functor_on F d₁).pi =
+      (F.map (canonical_mor' g d₂ d₁) ≫ canonical_mor d₂' (functor_on F d₂)) ≫ d₂'.pi := by
+    rw [Category.assoc, ← h2, ← h1']
+  refine mor_unique (d1 := d₂') ((functor_on F d₁).epsilon ≫ F.map g) _ h3 ?_
+  have e1 : d₁.epsilon ≫ g = FBF_on_mor d₂ d₁.Pbk h1 ≫ d₂.epsilon := Universal.comm _
+  have e2 : (functor_on F d₂).epsilon =
+      FBF_on_mor d₂' (functor_on F d₂).Pbk h2 ≫ d₂'.epsilon := Universal.comm _
+  change F.map d₁.epsilon ≫ F.map g = FBF_on_mor d₂' (functor_on F d₁).Pbk h3 ≫ d₂'.epsilon
+  rw [FBF_on_mor_comp' (functor_on F d₁) (functor_on F d₂) d₂' h1' h2 h3, Category.assoc, ← e2,
+    ← map_FBF_on_mor F d₁ d₂ h1 h1']
+  change F.map d₁.epsilon ≫ F.map g = F.map _ ≫ F.map d₂.epsilon
+  rw [← F.map_comp, e1, F.map_comp]
+
+/-- The right adjoint functor `P_u : C ⥤ Over X` associated to an exponentiable morphism `u : Y ⟶ X`.
+
+[Paper, §2.1, Prop. `prop:exp-mor-P-def`]. -/
+@[simps]
+noncomputable def pushforwardOver (u : Y ⟶ X) [IsExpArr u] : C ⥤ Over X where
+  obj c := Over.mk (IsExpArr.isExpArrowData (u := u) c).pi
+  map f := Over.homMk
+    (canonical_mor' f (IsExpArr.isExpArrowData (u := u) _) (IsExpArr.isExpArrowData (u := u) _))
+    (Universal.isSlice _).symm
+  map_id _ := Over.OverMorphism.ext (canonical_mor'_id' _)
+  map_comp f g := Over.OverMorphism.ext (canonical_mor'_comp' f g _ _ _).symm
+
+/-- The underlying functor `dom ∘ P_u : C ⥤ C` of the right adjoint `P_u : C ⥤ Over X`.
+
+[Paper, §2.1, Notation after Prop. `prop:exp-mor-P-def`]. -/
+@[simps]
+noncomputable def pushforwardDom (u : Y ⟶ X) [IsExpArr u] : C ⥤ C where
+  obj c := (IsExpArr.isExpArrowData (u := u) c).P
+  map f :=
+    canonical_mor' f (IsExpArr.isExpArrowData (u := u) _) (IsExpArr.isExpArrowData (u := u) _)
+  map_id _ := canonical_mor'_id' _
+  map_comp f g := (canonical_mor'_comp' f g _ _ _).symm
+
+/-- The canonical natural transformation from `F ∘ P_u` to `P_{F u} ∘ F` as functors
+`C ⥤ Over (F.obj X)`.
+
+[Paper, §2.1, Lemma `lem:preservation_pushforward`]. -/
+@[simps]
+noncomputable def pushforwardOverNatTrans (u : Y ⟶ X) (F : C ⥤ D)
+    [PreservesLimitsOfShape WalkingCospan F] [IsExpArr u] [IsExpArr (F.map u)] :
+    pushforwardOver u ⋙ Over.post F ⟶ F ⋙ pushforwardOver (F.map u) where
+  app c := Over.homMk
+    (canonical_mor (IsExpArr.isExpArrowData (u := F.map u) (F.obj c))
+      (functor_on F (IsExpArr.isExpArrowData (u := u) c)))
+    (Universal.isSlice _).symm
+  naturality _ _ f := Over.OverMorphism.ext
+    ((map_canonical_mor'_comp_canonical_mor F f _ _ _).trans
+      (canonical_mor_comp_canonical_mor' (F.map f) _ _ _).symm)
+
+/-- The canonical natural transformation from `F ∘ P_u` to `P_{F u} ∘ F` as functors `C ⥤ D`.
+
+[Paper, §2.1, Lemma `lem:preservation_pushforward`]. -/
+@[simps]
+noncomputable def pushforwardDomNatTrans (u : Y ⟶ X) (F : C ⥤ D)
+    [PreservesLimitsOfShape WalkingCospan F] [IsExpArr u] [IsExpArr (F.map u)] :
+    pushforwardDom u ⋙ F ⟶ F ⋙ pushforwardDom (F.map u) where
+  app c := canonical_mor (IsExpArr.isExpArrowData (u := F.map u) (F.obj c))
+    (functor_on F (IsExpArr.isExpArrowData (u := u) c))
+  naturality _ _ f :=
+    (map_canonical_mor'_comp_canonical_mor F f _ _ _).trans
+      (canonical_mor_comp_canonical_mor' (F.map f) _ _ _).symm
+
+noncomputable instance isIso_pushforwardDomNatTrans_app (u : Y ⟶ X) (F : C ⥤ D)
+    [PreservesLimitsOfShape WalkingCospan F] [IsExpArr u] [IsExpArr (F.map u)]
+    [FunctorPreserves u F] (c : C) : IsIso ((pushforwardDomNatTrans u F).app c) := by
+  haveI : Universal (functor_on F (IsExpArr.isExpArrowData (u := u) c)) :=
+    FunctorPreserves.functor_preserves (IsExpArr.isExpArrowData (u := u) c) inferInstance
+  exact ⟨canonical_mor (functor_on F (IsExpArr.isExpArrowData (u := u) c))
+      (IsExpArr.isExpArrowData (u := F.map u) (F.obj c)),
+    canonical_mor_isIso _ _, canonical_mor_isIso _ _⟩
+
+noncomputable instance isIso_pushforwardDomNatTrans (u : Y ⟶ X) (F : C ⥤ D)
+    [PreservesLimitsOfShape WalkingCospan F] [IsExpArr u] [IsExpArr (F.map u)]
+    [FunctorPreserves u F] : IsIso (pushforwardDomNatTrans u F) :=
+  (NatTrans.isIso_iff_isIso_app _).2 inferInstance
+
+noncomputable instance isIso_pushforwardOverNatTrans_app (u : Y ⟶ X) (F : C ⥤ D)
+    [PreservesLimitsOfShape WalkingCospan F] [IsExpArr u] [IsExpArr (F.map u)]
+    [FunctorPreserves u F] (c : C) : IsIso ((pushforwardOverNatTrans u F).app c) := by
+  haveI : IsIso ((pushforwardDomNatTrans u F).app c) := inferInstance
+  refine ⟨Over.homMk (inv ((pushforwardDomNatTrans u F).app c)) ?_, ?_, ?_⟩
+  · rw [IsIso.inv_comp_eq]
+    exact (Over.w ((pushforwardOverNatTrans u F).app c)).symm
+  · ext
+    exact IsIso.hom_inv_id ((pushforwardDomNatTrans u F).app c)
+  · ext
+    exact IsIso.inv_hom_id ((pushforwardDomNatTrans u F).app c)
+
+noncomputable instance isIso_pushforwardOverNatTrans (u : Y ⟶ X) (F : C ⥤ D)
+    [PreservesLimitsOfShape WalkingCospan F] [IsExpArr u] [IsExpArr (F.map u)]
+    [FunctorPreserves u F] : IsIso (pushforwardOverNatTrans u F) :=
+  (NatTrans.isIso_iff_isIso_app _).2 inferInstance
+
+/-- If the canonical natural transformation `pushforwardDomNatTrans u F` is an isomorphism, then
+`F` preserves the exponentiability of `u`.
+
+[Paper, §2.1, Lemma `lem:preservation_pushforward`]. -/
+@[reducible]
+noncomputable def functorPreserves_of_isIso_pushforwardDomNatTrans (u : Y ⟶ X) (F : C ⥤ D)
+    [PreservesLimitsOfShape WalkingCospan F] [IsExpArr u] [IsExpArr (F.map u)]
+    [IsIso (pushforwardDomNatTrans u F)] : FunctorPreserves u F :=
+  functor_preserves_1_is_enough u F (IsExpArr.isExpArrowData (u := u))
+    (IsExpArr.isExpArrow (u := u)) fun c => by
+      haveI : IsIso (canonical_mor (IsExpArr.isExpArrowData (u := F.map u) (F.obj c))
+          (functor_on F (IsExpArr.isExpArrowData (u := u) c))) :=
+        (NatTrans.isIso_iff_isIso_app (pushforwardDomNatTrans u F)).1 inferInstance c
+      exact canonical_mor_iso_lift (IsExpArr.isExpArrowData (u := F.map u) (F.obj c))
+        (functor_on F (IsExpArr.isExpArrowData (u := u) c))
+
+/-- If the canonical natural transformation `pushforwardOverNatTrans u F` is an isomorphism, then
+`F` preserves the exponentiability of `u`.
+
+[Paper, §2.1, Lemma `lem:preservation_pushforward`]. -/
+@[reducible]
+noncomputable def functorPreserves_of_isIso_pushforwardOverNatTrans (u : Y ⟶ X) (F : C ⥤ D)
+    [PreservesLimitsOfShape WalkingCospan F] [IsExpArr u] [IsExpArr (F.map u)]
+    [IsIso (pushforwardOverNatTrans u F)] : FunctorPreserves u F :=
+  haveI : IsIso (pushforwardDomNatTrans u F) :=
+    (NatTrans.isIso_iff_isIso_app _).2 fun c => by
+      haveI : IsIso ((pushforwardOverNatTrans u F).app c) :=
+        (NatTrans.isIso_iff_isIso_app (pushforwardOverNatTrans u F)).1 inferInstance c
+      exact (Over.forget (F.obj X)).map_isIso ((pushforwardOverNatTrans u F).app c)
+  functorPreserves_of_isIso_pushforwardDomNatTrans u F
+
+/-- **Equivalence between `FunctorPreserves u F` and [Paper, §2.1, Lemma `lem:preservation_pushforward`]**
+(for the right adjoints `P_u : C ⥤ Over X` and `P_{F u} : D ⥤ Over (F.obj X)`): when `u` and `F.map u`
+are both exponentiable and `F` preserves pullbacks, `FunctorPreserves u F` holds if and only if the
+canonical natural transformation `pushforwardOverNatTrans u F` from `F ∘ P_u` to `P_{F u} ∘ F` is an
+isomorphism. -/
+theorem functorPreserves_iff_isIso_pushforwardOverNatTrans (u : Y ⟶ X) (F : C ⥤ D)
+    [PreservesLimitsOfShape WalkingCospan F] [IsExpArr u] [IsExpArr (F.map u)] :
+    Nonempty (FunctorPreserves u F) ↔ IsIso (pushforwardOverNatTrans u F) :=
+  ⟨fun ⟨_⟩ => inferInstance, fun _ => ⟨functorPreserves_of_isIso_pushforwardOverNatTrans u F⟩⟩
+
+/-- **Equivalence between `FunctorPreserves u F` and [Paper, §2.1, Lemma `lem:preservation_pushforward`]**
+(for the underlying functors `dom ∘ P_u : C ⥤ C` and `dom ∘ P_{F u} : D ⥤ D`): when `u` and `F.map u`
+are both exponentiable and `F` preserves pullbacks, `FunctorPreserves u F` holds if and only if the
+canonical natural transformation `pushforwardDomNatTrans u F` from `F ∘ P_u` to `P_{F u} ∘ F` is an
+isomorphism. -/
+theorem functorPreserves_iff_isIso_pushforwardDomNatTrans (u : Y ⟶ X) (F : C ⥤ D)
+    [PreservesLimitsOfShape WalkingCospan F] [IsExpArr u] [IsExpArr (F.map u)] :
+    Nonempty (FunctorPreserves u F) ↔ IsIso (pushforwardDomNatTrans u F) :=
+  ⟨fun ⟨_⟩ => inferInstance, fun _ => ⟨functorPreserves_of_isIso_pushforwardDomNatTrans u F⟩⟩
+
+end PushforwardPreservation
+
+
