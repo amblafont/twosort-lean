@@ -47,7 +47,7 @@ itself formalised.
 | §3.1 Prop. `prop:p2-construction` | `SliceExp.sZ`, `sE`, `sW`, `su'` | `SliceExponentiable.lean` |
 | §3.1 Prop. `prop:p2-exponentiable` | `SliceExp.sIsExpArr`, `Φobj` | `SliceExponentiable.lean`, `LexpEndofunctor.lean` |
 | §3.1 Def. `def:two-sortification` | `twoSortification` | `TwoSortification.lean` |
-| §3.2 family GATs, Prop. `prop:family-gats` | not formalised | — |
+| §3.2 family GATs, Prop. `prop:family-gats` | `SliceExp.IsFamilyGat`, `Lexp.IsFamilyGat`, `SliceExp.IsFamilyGat.dom`, `SliceExp.IsFamilyGat.cod`, `SliceExp.IsFamilyGat.of_isPullback`, `SliceExp.IsFamilyGat.of_isLimit_fork`, `Lexp.IsFamilyGat.of_isLimit_finite`, `SliceExp.IsFamilyGat.exp`, `Lexp.isFamilyGat_inductive`, `Lexp.FamGat`, `Lexp.famGatHom`, `Lexp.exists_isFamilyGat_iso_twoSortification`, `Lexp.twoSortification_isFamilyGat` | `FamilyGat.lean` |
 | §4 Example `ex:main-thms` | `ColaxSliceCartExponentiable.setFam`, `ptFam` | `ColaxSliceCartExponentiable.lean` |
 | §4.1 Def. of \(\CAT /\!/_c \FamS\) | `ColaxSliceCart` | `ColaxSliceCart.lean` |
 | §4.1 Thm. `thm:colax-exponentiable` | `ColaxSliceCart.isTerminal`, `pullbackConeIsLimit`, `UFam`, `ColaxSliceCartExponentiable.expUniversal`, `ColaxSliceCartForget.forgetHom`, `ColaxSliceCartLexp` | `ColaxSliceCartLimits.lean`, `ColaxSliceCartExponentiable.lean`, `ColaxSliceCartForget.lean` |
@@ -68,7 +68,7 @@ itself formalised.
 | Paper | Lean | File |
 |---|---|---|
 | App. A.1 Prop. `prop:p2-description-polynomial` | `SliceExp.sOverData` | `SliceExponentiable.lean` |
-| App. A.2 (proof of Prop. `prop:family-gats`) | not formalised | — |
+| App. A.2 (proof of Prop. `prop:family-gats`) | `SliceExp.IsFamilyGat.exp_aux`, `SliceExp.IsFamilyGat.exp` | `FamilyGat.lean` |
 | App. A.3 Prop. `prop:comma-lexp` | `Lexp.comma` | `CommaLexp.lean` |
 | App. A.3 proof of Thm. `thm:universal-property-natural-transformation` | `natTrans_exists`, `natTrans_unique` | `UniversalNatTrans.lean` |
 | App. A.4 Props. `prop:colax-slice-limits`, `prop:cartesian-colax-lexp` | `ColaxSliceCart.isTerminal`, `pullbackConeIsLimit` (directly for the cartesian colax slice) | `ColaxSliceCartLimits.lean` |

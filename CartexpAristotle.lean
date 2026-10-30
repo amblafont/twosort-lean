@@ -23,6 +23,7 @@ import CartexpAristotle.SliceExponentiable
 import CartexpAristotle.SliceFunctor
 import CartexpAristotle.Strictification
 import CartexpAristotle.TwoSortification
+import CartexpAristotle.FamilyGat
 import CartexpAristotle.CoreProjectionMorphism
 import CartexpAristotle.TwoSortificationFullyFaithful
 import CartexpAristotle.Collage
@@ -83,6 +84,8 @@ the Lean declarations.
   `TwoSortification` (the model functor).
 * §3.1 Two-sortification: `SliceExponentiable` (Props. `prop:p2-construction`,
   `prop:p2-exponentiable`), `TwoSortification` (Def. `def:two-sortification`).
+* §3.2 Soundness (family GATs): `FamilyGat` (Def. of family GATs, Prop. `prop:family-gats` and
+  App. A.2, soundness Corollary).
 * §4.1 The family functor: `ColaxSliceCart`, `ColaxSliceCartLimits`,
   `ColaxSliceCartExponentiable`, `ColaxSliceCartForget` (Thm. `thm:colax-exponentiable`),
   `FamilyFunctor` (Cor. `cor:family-functor-gat`).
@@ -119,8 +122,8 @@ The subdirectory `InfiniteGat` proves Thm. `thm:infinite-GATs` of App. D: the pr
 `InfiniteGat.ProExponentiable` (Cor. `cor:exponentiable-free-filtered`),
 `InfiniteGat.ProExtendExp` (Prop. `prop:lift-lexp-functor`), `InfiniteGat.Limits`.
 
-Not formalised: §3.2 (family GATs, Prop. `prop:family-gats`), Prop. `prop:core_projection_preserves_initial`
-of §5.1, App. A.2, the remaining results of App. D (infinite GATs) beyond
+Not formalised: Prop. `prop:core_projection_preserves_initial`
+of §5.1, the remaining results of App. D (infinite GATs) beyond
 Thm. `thm:infinite-GATs`, and the description of `FinGat` as a syntactic category
 (here `FinGat` is any bi-initial object of `Lexp`, as allowed by Thm. `thm:uemura`).
 -/
